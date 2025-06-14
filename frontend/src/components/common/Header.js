@@ -8,6 +8,7 @@ import DiamondIcon from '@mui/icons-material/Diamond';
 import { Link } from 'react-router-dom';
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(true);
   const [cartItems] = useState(3);

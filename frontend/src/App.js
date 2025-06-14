@@ -5,8 +5,8 @@ import ContactUs from "./components/common/ContactUs";
 import Collections from "./components/common/Collections";
 import Login from './components/customerLoginSignup/Login';
 import Signup from './components/customerLoginSignup/Signup';
-import Dashboard from './components/Dashboard';
 import ProtectedRoute from './components/customerLoginSignup/ProtectedRoute';
+import Profile from "./components/consumer/pages/Profile";
 
 const App = () => {
   return (
@@ -18,7 +18,7 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route element={<ProtectedRoute />}>
-          <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/profile" element={<Profile />} />
         </Route>
         <Route path="*" element={<Navigate to="/"/>} />
       </Routes>
