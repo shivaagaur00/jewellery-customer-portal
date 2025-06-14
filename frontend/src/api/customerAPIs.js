@@ -8,3 +8,11 @@ export const signUp=async (data)=>{
         console.log(error);
     }
 }
+export const login=async (data)=>{
+    try {
+        let res=axios.post(`${URL}/login`,data);
+        return res;
+    } catch (error) {
+        console.log(error);
+    }
+}
