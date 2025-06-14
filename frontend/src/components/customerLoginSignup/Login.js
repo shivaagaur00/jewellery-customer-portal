@@ -4,6 +4,7 @@ import { Mail, Lock } from '@mui/icons-material';
 import DiamondIcon from '@mui/icons-material/Diamond';
 import axios from 'axios';
 import { CircularProgress } from '@mui/material';
+import { login } from '../../api/customerAPIs';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -36,7 +37,8 @@ const Login = () => {
     if (validateForm()) {
       setIsLoading(true);
       try {
-        console.log('Login data:', formData);
+        const res=login(formData);
+        console.log(res);
         alert('Login successful!');
       } catch (err) {
         setErrors(prev => ({
@@ -51,10 +53,7 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-white flex items-center justify-center p-4 sm:p-6 lg:p-8">
-      {/* Main Container - Responsive Width */}
       <div className="w-full max-w-6xl flex flex-col lg:flex-row bg-white rounded-xl shadow-lg overflow-hidden border border-amber-100">
-        
-        {/* Branding Section - Hidden on mobile, visible on tablet/desktop */}
         <div className="hidden md:flex md:w-1/2 bg-gradient-to-br from-amber-500 to-amber-700 flex-col items-center justify-center p-8 lg:p-12">
           <div className="flex flex-col items-center text-center">
             <div className="flex items-center gap-3 mb-4 lg:mb-6">
@@ -66,11 +65,8 @@ const Login = () => {
             </p>
           </div>
         </div>
-
-        {/* Form Section - Full width on mobile, half on tablet/desktop */}
         <div className="w-full md:w-1/2 flex items-center justify-center p-6 sm:p-8 lg:p-12">
           <div className="w-full max-w-md">
-            {/* Mobile-only header */}
             <div className="md:hidden mb-6 text-center">
               <div className="flex justify-center items-center gap-2 mb-3">
                 <DiamondIcon className="text-amber-600 text-3xl" />
@@ -81,8 +77,6 @@ const Login = () => {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <h2 className="hidden md:block text-2xl font-bold text-amber-800 text-center mb-6">Sign In</h2>
-              
-              {/* Email Field */}
               <div>
                 <label htmlFor="id" className="block text-sm sm:text-base font-medium text-amber-800 mb-1">
                   Email
@@ -104,8 +98,6 @@ const Login = () => {
                 </div>
                 {errors.id && <p className="mt-1 text-sm text-rose-600">{errors.id}</p>}
               </div>
-
-              {/* Password Field */}
               <div>
                 <label htmlFor="password" className="block text-sm sm:text-base font-medium text-amber-800 mb-1">
                   Password
