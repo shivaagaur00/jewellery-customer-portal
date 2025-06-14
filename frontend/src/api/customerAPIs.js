@@ -10,6 +10,7 @@ export const signUp=async (data)=>{
 }
 export const login=async (data)=>{
     try {
+        console.log(data);
         let res=axios.post(`${URL}/login`,data);
         return res;
     } catch (error) {
