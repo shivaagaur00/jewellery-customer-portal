@@ -1,5 +1,4 @@
 import axios from "axios"
-import { data } from "react-router-dom";
 const URL="http://localhost:8000";
 export const signUp=async (data)=>{
     try {
@@ -41,6 +40,19 @@ export const resetPassword = async (data, token) => {
     return res.data;
   } catch (error) {
     console.error("Failed to reset password", error);
+    throw error;
+  }
+};
+export const editBasicInfo = async (data, token) => {
+  try {
+    const res = await axios.post(`${URL}/editBasicInfo`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Failed to Edit Basic Info", error);
     throw error;
   }
 };
