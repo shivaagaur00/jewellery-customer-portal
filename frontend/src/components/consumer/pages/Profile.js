@@ -97,7 +97,7 @@ const Profile = () => {
     }
   };
 
-  const [showEditBasicInfoForm, setShowEditBasicInfoForm] = useState(true);
+  const [showEditBasicInfoForm, setShowEditBasicInfoForm] = useState(false);
   const [errorEditBasicInfoForm, setErroEditBasicInfoForm] = useState("");
   const [basicInfoForm, setBasicInfoForm] = useState({
     name: customer?.name || "",
@@ -228,15 +228,23 @@ const Profile = () => {
               </p>
             </div>
           </div>
-          <div className="mr-5">
-            <button
-              type="button"
-              onClick={() => setShowResetForm(true)}
-              className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors"
-            >
-              Reset Password
-            </button>
-          </div>
+<div className="flex flex-col space-y-3 mr-5">
+  <button
+    type="button"
+    onClick={() => setShowResetForm(true)}
+    className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-opacity-50"
+  >
+    Reset Password
+  </button>
+  <button
+    type="button"
+    onClick={() => setShowEditBasicInfoForm(true)}
+    className="px-4 py-2 bg-white border border-amber-500 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-opacity-50"
+  >
+    Edit Profile
+  </button>
+</div>
+                
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           <div className="bg-white rounded-lg shadow-md p-6">
