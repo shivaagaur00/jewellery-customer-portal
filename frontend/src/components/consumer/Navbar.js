@@ -1,42 +1,41 @@
 import React, { useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { logout } from './../../store/authSlice';
 import SearchIcon from '@mui/icons-material/Search';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import DiamondIcon from '@mui/icons-material/Diamond';
-import { Link } from 'react-router-dom';
-
-const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
-  const [cartItems] = useState(3);
-  const [wishlistItems] = useState(2);
-  
-  // Get auth state from Redux
-  const { isAuthenticated } = useSelector((state) => state.auth);
-  const dispatch = useDispatch();
-
-  const handleMenuToggle = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-  
-  const handleSearchToggle = () => {
-    setIsSearchOpen(!isSearchOpen);
-  };
-  
-  const handleAccountMenuOpen = () => {
-    setIsAccountMenuOpen(!isAccountMenuOpen);
-  };
-  
-  const handleLogout = () => {
+import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { logout } from '../../store/authSlice';
+import { toast } from 'react-toastify';
+function Navbar() {
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const dispatch=useDispatch();
+    const navigate=useNavigate();
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(true);
+    const [cartItems] = useState(3);
+    const [wishlistItems] = useState(2);
+    const handleMenuToggle = () => {
+      setIsMenuOpen(!isMenuOpen);
+    };
+    const handleSearchToggle = () => {
+      setIsSearchOpen(!isSearchOpen);
+    };
+    const handleAccountMenuOpen = () => {
+      setIsAccountMenuOpen((isAccountMenuOpen)=>!isAccountMenuOpen);
+    };
+    const handleLogout = () => {
+  try {
     dispatch(logout());
-    setIsAccountMenuOpen(false);
-  };
-
+    navigate('/login'); 
+    toast.success("Logged out successfully");
+  } catch (error) {
+    console.error("Logout failed:", error);
+  }
+};
+  
   return (
     <header className="sticky top-0 z-50 bg-gradient-to-br from-gray-50 to-white shadow-md border-b border-amber-100">
       <div className="container mx-auto px-6 py-3">
@@ -67,9 +66,9 @@ const Header = () => {
               Custom Orders
             </a>
             <Link to="/ContactUs">
-              <button className="text-amber-900 hover:text-amber-600 font-medium relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-amber-500 after:to-amber-700 hover:after:w-full after:transition-all after:duration-300 py-2">
-                Contact
-              </button>
+            <button className="text-amber-900 hover:text-amber-600 font-medium relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-amber-500 after:to-amber-700 hover:after:w-full after:transition-all after:duration-300 py-2">
+              Contact
+            </button>
             </Link>
           </nav>
           <div className="hidden md:flex items-center gap-4">
@@ -97,50 +96,23 @@ const Header = () => {
                 </span>
               )}
             </button>
-            
-            <div className="relative">
-              <button 
-                onClick={handleAccountMenuOpen}
-                className="p-2 rounded-full hover:bg-amber-50 text-amber-800 hover:text-amber-600 transition-colors"
-              >
-                <AccountCircleIcon />
-              </button>
-              
-              {isAccountMenuOpen && (
-                <div className="absolute right-0 top-full mt-2 bg-white shadow-lg rounded-md py-2 w-48 z-20 border border-amber-100">
-                  {isAuthenticated ? (
-                    <>
-                      <Link to="/profile" className="block px-4 py-2 text-amber-800 hover:bg-amber-50" onClick={() => setIsAccountMenuOpen(false)}>
-                        Profile
-                      </Link>
-                      <Link to="/orders" className="block px-4 py-2 text-amber-800 hover:bg-amber-50" onClick={() => setIsAccountMenuOpen(false)}>
-                        My Orders
-                      </Link>
-                      <div className="border-t border-amber-100 my-1"></div>
-                      <button 
-                        onClick={handleLogout}
-                        className="w-full text-left px-4 py-2 text-amber-800 hover:bg-amber-50"
-                      >
-                        Logout
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <Link to="/login" className="block px-4 py-2 text-amber-800 hover:bg-amber-50" onClick={() => setIsAccountMenuOpen(false)}>
-                        Login
-                      </Link>
-                      <Link to="/register" className="block px-4 py-2 text-amber-800 hover:bg-amber-50" onClick={() => setIsAccountMenuOpen(false)}>
-                        Sign Up
-                      </Link>
-                    </>
-                  )}
-                </div>
-              )}
-            </div>
+            <button 
+              onClick={handleAccountMenuOpen}
+              className="p-2 rounded-full hover:bg-amber-50 text-amber-800 hover:text-amber-600 transition-colors"
+            >
+              <AccountCircleIcon />
+            </button>
+            {isAccountMenuOpen && (
+              <div className="absolute right-6 top-16 bg-white shadow-lg rounded-md py-2 w-48 z-20 border border-amber-100">
+                <a href="#" className="block px-4 py-2 text-amber-800 hover:bg-amber-50">Profile</a>
+                <a href="#" className="block px-4 py-2 text-amber-800 hover:bg-amber-50">My Orders</a>
+                <div className="border-t border-amber-100 my-1"></div>
+                <button onClick={handleLogout} className="block px-4 py-2 text-amber-800 hover:bg-amber-50">Logout</button>
+              </div>
+            )}
           </div>
         </div>
       </div>
-      
       {isSearchOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
@@ -170,6 +142,6 @@ const Header = () => {
       )}
     </header>
   );
-};
+}
 
-export default Header;
+export default Navbar; 

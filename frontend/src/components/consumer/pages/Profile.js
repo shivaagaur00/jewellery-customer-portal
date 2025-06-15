@@ -7,7 +7,7 @@ import {
   dummyTransactions,
   dummyItems
 } from './../DummyData';
-import Navbar from './../../Navbar';
+import Navbar from './../Navbar';
 const Profile = () => {
   const consumer = dummyConsumer;
   const orders = dummyOrders.filter(order => order.customerID === consumer.id);
