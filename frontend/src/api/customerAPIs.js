@@ -1,4 +1,5 @@
 import axios from "axios"
+import { data } from "react-router-dom";
 const URL="http://localhost:8000";
 export const signUp=async (data)=>{
     try {
@@ -27,6 +28,19 @@ export const getCustomer = async (token) => {
     return res.data;
   } catch (error) {
     console.error("Failed to fetch customer data", error);
+    throw error;
+  }
+};
+export const resetPassword = async (data, token) => {
+  try {
+    const res = await axios.post(`${URL}/resetPassword`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Failed to reset password", error);
     throw error;
   }
 };

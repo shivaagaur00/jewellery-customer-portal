@@ -14,7 +14,7 @@ function Navbar() {
     const dispatch=useDispatch();
     const navigate=useNavigate();
     const [isSearchOpen, setIsSearchOpen] = useState(false);
-    const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(true);
+    const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
     const [cartItems] = useState(3);
     const [wishlistItems] = useState(2);
     const handleMenuToggle = () => {

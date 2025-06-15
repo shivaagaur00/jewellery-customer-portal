@@ -1,294 +1,487 @@
-import React, { useEffect, useState } from 'react';
-import Navbar from './../Navbar';
-import { getCustomer } from '../../../api/customerAPIs';
-import { useSelector } from 'react-redux';
+  import React, { useEffect, useState } from "react";
+  import Navbar from "./../Navbar";
+  import { getCustomer, resetPassword } from "../../../api/customerAPIs";
+  import { useSelector } from "react-redux";
+  import { current } from "@reduxjs/toolkit";
 
-const Profile = () => {
-  const [customer, setCustomer] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  
-  const token = useSelector(state => state.auth.user?.token);
-  const userId = useSelector(state => state.auth.user?.id);
-
-  useEffect(() => {
-    const fetchCustomerData = async () => {
-      try {
-        setLoading(true);
-        const customerData = await getCustomer(token);
-        console.log(customerData);
-        setCustomer(customerData);
-      } catch (err) {
-        setError(err.message || 'Failed to fetch customer data');
-      } finally {
-        setLoading(false);
-      }
+  const Profile = () => {
+    const [customer, setCustomer] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [showResetForm, setShowResetForm] = useState(false);
+    const [errorResetForm, setErrorResetForm] = useState("");
+    const token = useSelector((state) => state.auth.user?.token);
+    const [resetPasswordForm, setResetPasswordForm] = useState({
+      currentPassword: "",
+      newPassword: "",
+    });
+    const HandleInputChangePassword = (e) => {
+      const { name, value } = e.target;
+      setResetPasswordForm((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
     };
-    fetchCustomerData();
-  }, []);
+    const handlePasswordChange = async () => {
+    try {
+      if (
+        !resetPasswordForm.currentPassword ||
+        !resetPasswordForm.newPassword
+      ) {
+        setErrorResetForm("Enter Current and New password");
+        return;
+      }
+      const res = await resetPassword(
+        {
+          current: resetPasswordForm.currentPassword,
+          newPassword: resetPasswordForm.newPassword,
+        },
+        token
+      );
+      if(res.message=="Password changed successfully") setShowResetForm(false);
+    } catch (error) {
+      console.log("Password reset failed:", error);
+    }
+  };
+    useEffect(() => {
+      const fetchCustomerData = async () => {
+        try {
+          setLoading(true);
+          const customerData = await getCustomer(token);
+          console.log(customerData);
+          setCustomer(customerData);
+        } catch (err) {
+          setError(err.message || "Failed to fetch customer data");
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchCustomerData();
+    }, []);
 
-  if (loading) {
+    if (loading) {
+      return (
+        <>
+          <Navbar />
+          <div className="container mx-auto px-4 py-8">
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-500 mx-auto"></div>
+              <p className="mt-4 text-gray-600">Loading your profile...</p>
+            </div>
+          </div>
+        </>
+      );
+    }
+    if (error) {
+      return (
+        <>
+          <Navbar />
+          <div className="container mx-auto px-4 py-8">
+            <div
+              className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+              role="alert"
+            >
+              <strong className="font-bold">Error! </strong>
+              <span className="block sm:inline">{error}</span>
+            </div>
+          </div>
+        </>
+      );
+    }
+    if (!customer) {
+      return (
+        <>
+          <Navbar />
+          <div className="container mx-auto px-4 py-8">
+            <div className="bg-white rounded-lg shadow-md p-6 text-center">
+              <h2 className="text-xl font-semibold mb-4">
+                No customer data found
+              </h2>
+            </div>
+          </div>
+        </>
+      );
+    }
+    const unreadNotifications =
+      customer.notifications?.filter((notification) => !notification.isRead) ||
+      [];
+    const readNotifications =
+      customer.notifications?.filter((notification) => notification.isRead) || [];
+
     return (
       <>
         <Navbar />
         <div className="container mx-auto px-4 py-8">
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-500 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading your profile...</p>
+          <div className="flex justify-between bg-white rounded-lg shadow-md p-6 mb-6">
+            <div className="flex flex-col md:flex-row items-center">
+              <img
+                src={customer.image || "/default-profile.png"}
+                alt={customer.name}
+                className="w-32 h-32 rounded-full object-cover mb-4 md:mb-0 md:mr-6"
+              />
+              <div>
+                <h1 className="text-2xl font-bold text-gray-800">
+                  {customer.name}
+                </h1>
+                <p className="text-gray-600 mb-2">{customer.address}</p>
+                <p className="text-gray-600 mb-2">{customer.contactNumber}</p>
+                <p className="text-gray-600">
+                  Member since: {new Date(customer.date).toLocaleDateString()}
+                </p>
+              </div>
+            </div>
+              <div className="mr-5">
+                          <button
+              type="button"
+              onClick={()=>setShowResetForm(true)}
+              className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors"
+            >
+              Reset Password
+            </button>
+              </div>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-semibold mb-4 text-red-600">
+                Unread Notifications
+              </h2>
+              {unreadNotifications.length > 0 ? (
+                <ul className="space-y-3">
+                  {unreadNotifications.map((notification, index) => (
+                    <li
+                      key={index}
+                      className="border-l-4 border-red-500 pl-4 py-2"
+                    >
+                      <p className="font-medium">{notification.message}</p>
+                      <p className="text-sm text-gray-500">
+                        {new Date(notification.date).toLocaleDateString()}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-500">No unread notifications</p>
+              )}
+            </div>
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-semibold mb-4 text-gray-700">
+                Recent Notifications
+              </h2>
+              {readNotifications.length > 0 ? (
+                <ul className="space-y-3">
+                  {readNotifications.map((notification, index) => (
+                    <li
+                      key={index}
+                      className="border-l-4 border-gray-300 pl-4 py-2"
+                    >
+                      <p className="text-gray-700">{notification.message}</p>
+                      <p className="text-sm text-gray-500">
+                        {new Date(notification.date).toLocaleDateString()}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-500">No recent notifications</p>
+              )}
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-xl font-semibold mb-4">Your Orders</h2>
+            {customer.orders?.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Item
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Amount
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Expected Delivery
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {customer.orders.map((order, index) => (
+                      <tr key={index}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="font-medium text-gray-900">
+                            {order.itemName}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {order.orderDescription}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span
+                            className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                            ${
+                              order.status === "Completed"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-yellow-100 text-yellow-800"
+                            }`}
+                          >
+                            {order.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-gray-900">
+                            ${order.priceExpected}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            Deposit: ${order.depositedAmount}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(
+                            order.expectedDeliverDate
+                          ).toLocaleDateString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-gray-500">No orders found</p>
+            )}
+          </div>
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-xl font-semibold mb-4">Your Loans</h2>
+            {customer.loan?.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Item
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Amount
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Due Date
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {customer.loan.map((loan, index) => (
+                      <tr key={index}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="font-medium text-gray-900">
+                            {loan.itemType}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {loan.itemDescription}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span
+                            className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                            ${
+                              loan.status === "Active"
+                                ? "bg-blue-100 text-blue-800"
+                                : "bg-green-100 text-green-800"
+                            }`}
+                          >
+                            {loan.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-gray-900">${loan.loanAmount}</div>
+                          <div className="text-sm text-gray-500">
+                            Paid: ${loan.loanPaidedAmount}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            Remaining: ${loan.remainingAmount}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(loan.dueDate).toLocaleDateString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-gray-500">No active loans</p>
+            )}
+          </div>
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-xl font-semibold mb-4">Your Purchases</h2>
+            {customer.purchases?.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Amount Paid
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Quantity
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Date
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {customer.purchases.map((purchase, index) => (
+                      <tr key={index}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          ${purchase.amountPaid}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {purchase.quantity}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(purchase.date).toLocaleDateString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-gray-500">No purchases found</p>
+            )}
+          </div>
+
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-semibold mb-4">Recent Transactions</h2>
+            {customer.transactions?.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Date
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Description
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Amount
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {customer.transactions.map((transaction, index) => (
+                      <tr key={index}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(transaction.date).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="font-medium text-gray-900">
+                            {transaction.description}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {transaction.transactionMode}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          ${transaction.transactionAmount}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span
+                            className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                            ${
+                              transaction.status === "Completed"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-yellow-100 text-yellow-800"
+                            }`}
+                          >
+                            {transaction.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-gray-500">No transactions found</p>
+            )}
           </div>
         </div>
-      </>
-    );
-  }
-
-  if (error) {
-    return (
-      <>
-        <Navbar />
-        <div className="container mx-auto px-4 py-8">
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-            <strong className="font-bold">Error! </strong>
-            <span className="block sm:inline">{error}</span>
+        {showResetForm && (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
+        <h2 className="text-xl font-semibold text-amber-900">Reset Password</h2>
+        
+        {errorResetForm && (
+          <div className="p-3 bg-red-100 text-red-700 rounded-lg">
+            {errorResetForm}
           </div>
-        </div>
-      </>
-    );
-  }
-
-  if (!customer) {
-    return (
-      <>
-        <Navbar />
-        <div className="container mx-auto px-4 py-8">
-          <div className="bg-white rounded-lg shadow-md p-6 text-center">
-            <h2 className="text-xl font-semibold mb-4">No customer data found</h2>
-          </div>
-        </div>
-      </>
-    );
-  }
-  const unreadNotifications = customer.notifications?.filter(notification => !notification.isRead) || [];
-  const readNotifications = customer.notifications?.filter(notification => notification.isRead) || [];
-
-  return (
-    <>
-      <Navbar />
-      <div className="container mx-auto px-4 py-8">
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <div className="flex flex-col md:flex-row items-center">
-            <img 
-              src={customer.image || '/default-profile.png'} 
-              alt={customer.name} 
-              className="w-32 h-32 rounded-full object-cover mb-4 md:mb-0 md:mr-6"
+        )}
+        
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-amber-900 mb-1">
+              Current Password
+            </label>
+            <input
+              type="password"
+              name="currentPassword"
+              value={resetPassword.currentPassword}
+              onChange={HandleInputChangePassword}
+              className="w-full p-2 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+              placeholder="Enter current password"
+              required
             />
-            <div>
-              <h1 className="text-2xl font-bold text-gray-800">{customer.name}</h1>
-              <p className="text-gray-600 mb-2">{customer.address}</p>
-              <p className="text-gray-600 mb-2">{customer.contactNumber}</p>
-              <p className="text-gray-600">Member since: {new Date(customer.date).toLocaleDateString()}</p>
-            </div>
           </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold mb-4 text-red-600">Unread Notifications</h2>
-            {unreadNotifications.length > 0 ? (
-              <ul className="space-y-3">
-                {unreadNotifications.map((notification, index) => (
-                  <li key={index} className="border-l-4 border-red-500 pl-4 py-2">
-                    <p className="font-medium">{notification.message}</p>
-                    <p className="text-sm text-gray-500">{new Date(notification.date).toLocaleDateString()}</p>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-gray-500">No unread notifications</p>
-            )}
+          
+          <div>
+            <label className="block text-sm font-medium text-amber-900 mb-1">
+              New Password
+            </label>
+            <input
+              type="password"
+              name="newPassword"
+              onChange={HandleInputChangePassword}
+              value={resetPassword.newPassword}
+              className="w-full p-2 border border-amber-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+              placeholder="Enter new password"
+              required
+            />
           </div>
-
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-700">Recent Notifications</h2>
-            {readNotifications.length > 0 ? (
-              <ul className="space-y-3">
-                {readNotifications.map((notification, index) => (
-                  <li key={index} className="border-l-4 border-gray-300 pl-4 py-2">
-                    <p className="text-gray-700">{notification.message}</p>
-                    <p className="text-sm text-gray-500">{new Date(notification.date).toLocaleDateString()}</p>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-gray-500">No recent notifications</p>
-            )}
+          
+          <div className="flex justify-end space-x-3 pt-2">
+            <button
+              type="button"
+              onClick={() => setShowResetForm(false)}
+              className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handlePasswordChange}
+              className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors"
+            >
+              Reset Password
+            </button>
           </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">Your Orders</h2>
-          {customer.orders?.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expected Delivery</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {customer.orders.map((order, index) => (
-                    <tr key={index}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="font-medium text-gray-900">{order.itemName}</div>
-                        <div className="text-sm text-gray-500">{order.orderDescription}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                          ${order.status === 'Completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                          {order.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-gray-900">${order.priceExpected}</div>
-                        <div className="text-sm text-gray-500">Deposit: ${order.depositedAmount}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(order.expectedDeliverDate).toLocaleDateString()}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <p className="text-gray-500">No orders found</p>
-          )}
-        </div>
-
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">Your Loans</h2>
-          {customer.loan?.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {customer.loan.map((loan, index) => (
-                    <tr key={index}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="font-medium text-gray-900">{loan.itemType}</div>
-                        <div className="text-sm text-gray-500">{loan.itemDescription}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                          ${loan.status === 'Active' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}`}>
-                          {loan.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-gray-900">${loan.loanAmount}</div>
-                        <div className="text-sm text-gray-500">Paid: ${loan.loanPaidedAmount}</div>
-                        <div className="text-sm text-gray-500">Remaining: ${loan.remainingAmount}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(loan.dueDate).toLocaleDateString()}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <p className="text-gray-500">No active loans</p>
-          )}
-        </div>
-
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">Your Purchases</h2>
-          {customer.purchases?.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount Paid</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {customer.purchases.map((purchase, index) => (
-                    <tr key={index}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        ${purchase.amountPaid}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {purchase.quantity}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(purchase.date).toLocaleDateString()}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <p className="text-gray-500">No purchases found</p>
-          )}
-        </div>
-
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold mb-4">Recent Transactions</h2>
-          {customer.transactions?.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {customer.transactions.map((transaction, index) => (
-                    <tr key={index}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(transaction.date).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="font-medium text-gray-900">{transaction.description}</div>
-                        <div className="text-sm text-gray-500">{transaction.transactionMode}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        ${transaction.transactionAmount}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                          ${transaction.status === 'Completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                          {transaction.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <p className="text-gray-500">No transactions found</p>
-          )}
         </div>
       </div>
-    </>
-  );
-};
+    </div>
+  )}
+      </>
+    );
+  };
 
-export default Profile;
+  export default Profile;
