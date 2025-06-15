@@ -15,15 +15,12 @@ const Header = () => {
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const [cartItems] = useState(3);
   const [wishlistItems] = useState(2);
-  
-  // Get auth state from Redux
   const { isAuthenticated } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
-
   const handleMenuToggle = () => {
     setIsMenuOpen(!isMenuOpen);
   };
-  
+
   const handleSearchToggle = () => {
     setIsSearchOpen(!isSearchOpen);
   };

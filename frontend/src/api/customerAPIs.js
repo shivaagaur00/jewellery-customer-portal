@@ -17,3 +17,16 @@ export const login=async (data)=>{
         console.log(error);
     }
 }
+export const getCustomer = async (token) => {
+  try {
+    const res = await axios.get(`${URL}/customer`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Failed to fetch customer data", error);
+    throw error;
+  }
+};
