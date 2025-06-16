@@ -56,3 +56,11 @@ export const editBasicInfo = async (data, token) => {
     throw error;
   }
 };
+export const getDetailsWithoutLogin=async()=>{
+  try {
+    let res=await axios.post(`${URL}/getDetailsWithoutLogin`);
+    return res.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
