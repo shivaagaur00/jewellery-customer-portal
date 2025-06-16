@@ -5,7 +5,7 @@ import Footer from "./common/Footer";
 import Categories from "./common/Categories";
 import LiveMetalRates from "./common/LiveMetalRates";
 import Newsletter from "./common/Newsletter";
-import Testimonials from "./common/Testimonials";
+import JewelleryTypes from "./common/JewelleryTypes";
 import Header from "./common/Header";
 function LandingPage() {
   return (
@@ -14,7 +14,7 @@ function LandingPage() {
       <HeroSection />
       <FeaturedCollections />
       <Categories />
-      <Testimonials />
+      <JewelleryTypes />
       <Newsletter />
       <LiveMetalRates></LiveMetalRates>
       <Footer />
