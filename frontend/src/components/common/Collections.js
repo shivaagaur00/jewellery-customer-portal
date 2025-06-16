@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Star, Favorite, FavoriteBorder, FlashOn, NewReleases,
-  LocalFireDepartment, Whatshot, FilterList, Search, Close
+  Star, Favorite, FavoriteBorder, NewReleases,
+  LocalFireDepartment, FilterList, Search, Close
 } from '@mui/icons-material';
 import { getDetailsWithoutLogin } from '../../api/customerAPIs';
-
 const Collections = () => {
   const [collections, setCollections] = useState([]);
   const [filteredCollections, setFilteredCollections] = useState([]);
@@ -13,7 +12,7 @@ const Collections = () => {
   const [filters, setFilters] = useState({
     category: [],
     metalType: [],
-    priceRange: [0, 50000000],
+    priceRange: [0, 5000000],
     inStock: false,
     onSale: false
   });
@@ -22,8 +21,6 @@ const Collections = () => {
   const [wishlist, setWishlist] = useState([]);
   const [quickViewItem, setQuickViewItem] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
-
-  // Fetch data
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -38,12 +35,8 @@ const Collections = () => {
     };
     fetchData();
   }, []);
-
-  // Apply filters, search and sort
   useEffect(() => {
     let result = [...collections];
-
-    // Apply search
     if (searchTerm) {
       result = result.filter(item =>
         item.itemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -51,34 +44,22 @@ const Collections = () => {
         item.category.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-
-    // Apply category filter
     if (filters.category.length > 0) {
       result = result.filter(item => filters.category.includes(item.category));
     }
-
-    // Apply metal type filter
     if (filters.metalType.length > 0) {
       result = result.filter(item => filters.metalType.includes(item.metalType));
     }
-
-    // Apply price range filter
     result = result.filter(item => {
       const price = parseFloat(item.metalPrice);
       return price >= filters.priceRange[0] && price <= filters.priceRange[1];
     });
-
-    // Apply in stock filter
     if (filters.inStock) {
       result = result.filter(item => item.quantity > 0);
     }
-
-    // Apply on sale filter
     if (filters.onSale) {
       result = result.filter(item => item.tags && item.tags.includes('sale'));
     }
-
-    // Apply sorting
     switch (sortOption) {
       case 'price-low':
         result.sort((a, b) => parseFloat(a.metalPrice) - parseFloat(b.metalPrice));
@@ -90,19 +71,15 @@ const Collections = () => {
         result.sort((a, b) => new Date(b.date) - new Date(a.date));
         break;
       case 'rating':
-        // Assuming we add rating to schema later
         result.sort((a, b) => (b.rating || 0) - (a.rating || 0));
         break;
-      default: // 'featured'
-        // Original order or some featured logic
+      default: 
         break;
     }
 
     setFilteredCollections(result);
-    setVisibleItems(8); // Reset visible items when filters change
+    setVisibleItems(8); 
   }, [collections, searchTerm, filters, sortOption]);
-
-  // Toggle wishlist item
   const toggleWishlist = (itemId) => {
     setWishlist(prev =>
       prev.includes(itemId)
@@ -110,13 +87,9 @@ const Collections = () => {
         : [...prev, itemId]
     );
   };
-
-  // Load more items
   const loadMore = () => {
     setVisibleItems(prev => prev + 8);
   };
-
-  // Toggle filter
   const toggleFilter = (filterType, value) => {
     setFilters(prev => {
       const currentValues = prev[filterType];
@@ -127,21 +100,16 @@ const Collections = () => {
     });
   };
 
-  // Get unique values for filters
   const getUniqueValues = (key) => {
     const values = collections.map(item => item[key]);
     return [...new Set(values)];
   };
-
-  // Check if item is new (added in last 30 days)
   const isNewItem = (dateString) => {
     const itemDate = new Date(dateString);
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     return itemDate > thirtyDaysAgo;
   };
-
-  // Quick view modal
   const QuickViewModal = ({ item, onClose }) => {
     if (!item) return null;
     
@@ -178,7 +146,7 @@ const Collections = () => {
                   <span className="text-2xl font-bold">${item.metalPrice}</span>
                   {item.tags?.includes('sale') && (
                     <span className="text-lg text-gray-500 line-through ml-2">
-                      ${(parseFloat(item.metalPrice) * 1.2).toFixed(2)}
+                      ₹{(parseFloat(item.metalPrice) * 1.2).toFixed(2)}
                     </span>
                   )}
                 </div>
@@ -237,13 +205,11 @@ const Collections = () => {
     <div className="bg-gray-50 min-h-screen py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
-          <h1 className="text-3xl font-serif font-bold text-gray-900 mb-2">Our Exquisite Collections</h1>
+          <h1 className="text-7xl font-titillium font-bold text-amber-600 mb-2">Our Exquisite Collections</h1>
           <p className="text-gray-600 max-w-2xl mx-auto">
             Discover handcrafted jewelry pieces that reflect elegance and timeless beauty
           </p>
         </div>
-
-        {/* Search and Filter Bar */}
         <div className="mb-8 flex flex-col md:flex-row gap-4 items-stretch">
           <div className="relative flex-grow">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -324,7 +290,7 @@ const Collections = () => {
                   <input
                     type="range"
                     min="0"
-                    max="500000"
+                    max="5000000"
                     step="100"
                     value={filters.priceRange[1]}
                     onChange={(e) => setFilters(prev => ({
@@ -334,8 +300,8 @@ const Collections = () => {
                     className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                   />
                   <div className="flex justify-between mt-2">
-                    <span>${filters.priceRange[0]}</span>
-                    <span>${filters.priceRange[1]}</span>
+                    <span>₹{filters.priceRange[0]}</span>
+                    <span>₹{filters.priceRange[1]}</span>
                   </div>
                 </div>
                 
@@ -389,7 +355,7 @@ const Collections = () => {
                 setFilters({
                   category: [],
                   metalType: [],
-                  priceRange: [0, 500000],
+                  priceRange: [0, 5000000],
                   inStock: false,
                   onSale: false
                 });
@@ -459,10 +425,10 @@ const Collections = () => {
                 
                 <div className="mt-auto">
                   <div className="flex items-center mb-2">
-                    <span className="text-lg font-bold text-gray-900">${item.metalPrice}</span>
+                    <span className="text-lg font-bold text-gray-900">₹{item.metalPrice}</span>
                     {item.tags?.includes('sale') && (
                       <span className="text-sm text-gray-500 line-through ml-2">
-                        ${(parseFloat(item.metalPrice) * 1.2).toFixed(2)}
+                        ₹{(parseFloat(item.metalPrice) * 1.2).toFixed(2)}
                       </span>
                     )}
                   </div>
