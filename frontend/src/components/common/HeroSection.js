@@ -1,8 +1,10 @@
 import React from 'react';
 import DiamondIcon from '@mui/icons-material/Diamond';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { Link } from 'react-router-dom';
 
 const HeroSection = () => {
+  
   return (
     <section id="home" className="relative bg-gradient-to-br from-amber-50 via-amber-50 to-amber-100 py-24 overflow-hidden">
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden opacity-10">
@@ -27,9 +29,11 @@ const HeroSection = () => {
             <button className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-3 rounded-full font-medium flex items-center justify-center transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-amber-200/50">
               Shop Now <ArrowForwardIcon className="ml-2" />
             </button>
+            <Link to="/collections">
             <button className="border-2 border-amber-600 text-amber-600 hover:bg-amber-50 px-8 py-3 rounded-full font-medium transition-all duration-300 hover:shadow-md">
               Explore Collections
             </button>
+            </Link>
           </div>
           <div className="mt-12 flex flex-wrap items-center gap-6">
             <div className="flex items-center">

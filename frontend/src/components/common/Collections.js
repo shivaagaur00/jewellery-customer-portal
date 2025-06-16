@@ -112,7 +112,6 @@ const Collections = () => {
   };
   const QuickViewModal = ({ item, onClose }) => {
     if (!item) return null;
-    
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
@@ -245,8 +244,6 @@ const Collections = () => {
             </select>
           </div>
         </div>
-
-        {/* Filters Panel */}
         {showFilters && (
           <div className="bg-white p-6 rounded-lg shadow-md mb-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -330,20 +327,14 @@ const Collections = () => {
             </div>
           </div>
         )}
-
-        {/* Results Count */}
         <div className="mb-4 text-sm text-gray-600">
           Showing {Math.min(visibleItems, filteredCollections.length)} of {filteredCollections.length} items
         </div>
-
-        {/* Loading State */}
         {loading && (
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-500"></div>
           </div>
         )}
-
-        {/* No Results */}
         {!loading && filteredCollections.length === 0 && (
           <div className="text-center py-12">
             <h3 className="text-xl font-medium mb-2">No items found</h3>
@@ -365,8 +356,6 @@ const Collections = () => {
             </button>
           </div>
         )}
-
-        {/* Products Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredCollections.slice(0, visibleItems).map((item) => (
             <div key={item.ID} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition duration-300 flex flex-col">
@@ -448,8 +437,6 @@ const Collections = () => {
             </div>
           ))}
         </div>
-
-        {/* Load More Button */}
         {visibleItems < filteredCollections.length && (
           <div className="text-center mt-12">
             <button 
@@ -460,8 +447,6 @@ const Collections = () => {
             </button>
           </div>
         )}
-
-        {/* Quick View Modal */}
         {quickViewItem && (
           <QuickViewModal 
             item={quickViewItem} 

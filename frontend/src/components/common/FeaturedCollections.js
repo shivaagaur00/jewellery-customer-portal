@@ -1,52 +1,35 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import StarIcon from '@mui/icons-material/Star';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
 import { Link } from 'react-router-dom';
+import { getDetailsWithoutLogin } from '../../api/customerAPIs';
 
 const FeaturedCollections = () => {
-  const collections = [
-    {
-      id: 1,
-      name: 'Gold Plated Earrings',
-      price: '₹8,999',
-      originalPrice: '₹12,999',
-      discount: '30% OFF',
-      image: 'https://images.unsplash.com/photo-1611591437281-460914d0f587?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
-      rating: 4.8,
-      isNew: true,
-    },
-    {
-      id: 2,
-      name: 'Silver Bracelet',
-      price: '₹6,499',
-      originalPrice: '₹9,999',
-      discount: '35% OFF',
-      image: 'https://images.unsplash.com/photo-1602173574767-37ac01994b2a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
-      rating: 4.5,
-      isTrending: true,
-    },
-    {
-      id: 3,
-      name: 'Diamond Ring',
-      price: '₹24,999',
-      originalPrice: '₹34,999',
-      discount: '28% OFF',
-      image: 'https://images.unsplash.com/photo-1603974372038-a6e1c8625b71?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
-      rating: 4.9,
-      isBestSeller: true,
-    },
-    {
-      id: 4,
-      name: 'Pearl Necklace',
-      price: '₹18,499',
-      originalPrice: '₹25,999',
-      discount: '28% OFF',
-      image: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
-      rating: 4.7,
-      isLimited: true,
-    },
-  ];
+  const [collections, setCollections] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await getDetailsWithoutLogin();
+        setCollections(res.data.item);
+        setLoading(false);
+      } catch (error) {
+        console.error(error);
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-500"></div>
+      </div>
+    );
+  }
 
   return (
     <section id="collections" className="py-20 bg-gradient-to-b from-amber-50 to-white relative overflow-hidden">
@@ -67,8 +50,9 @@ const FeaturedCollections = () => {
             Discover our exquisite handcrafted jewelry pieces that blend tradition with modern elegance.
           </p>
         </div>
+        
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {collections.map((item, index) => (
+          {collections.slice(0, 4).map((item) => (
             <div
               key={item.id}
               className="group relative bg-white rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2"
@@ -84,41 +68,26 @@ const FeaturedCollections = () => {
                     TRENDING
                   </span>
                 )}
-                {item.isBestSeller && (
-                  <span className="px-3 py-1 bg-purple-500 text-white text-xs font-bold rounded-full shadow-md">
-                    BESTSELLER
-                  </span>
-                )}
-                {item.isLimited && (
-                  <span className="px-3 py-1 bg-rose-500 text-white text-xs font-bold rounded-full shadow-md">
-                    LIMITED
-                  </span>
-                )}
-                {item.discount && (
-                  <span className="px-3 py-1 bg-amber-500 text-white text-xs font-bold rounded-full shadow-md">
-                    {item.discount}
-                  </span>
-                )}
               </div>
+              
               <div className="absolute top-4 right-4 z-10">
                 <button className="p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-lg hover:bg-rose-100 text-gray-500 hover:text-rose-500 transition-all duration-300 transform group-hover:scale-110">
                   <FavoriteIcon fontSize="small" />
                 </button>
               </div>
+              
               <div className="relative h-80 overflow-hidden">
                 <img
                   src={item.image}
                   alt={item.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               </div>
+              
               <div className="p-6">
-                <div className="flex justify-between items-start mb-3">
-                  <h3 className="font-bold text-lg text-gray-900 group-hover:text-amber-600 transition-colors duration-300">
-                    {item.name}
-                  </h3>
-                </div>
+                <h3 className="font-bold text-lg text-gray-900 group-hover:text-amber-600 transition-colors duration-300 mb-3">
+                  {item.name}
+                </h3>
                 
                 <div className="flex items-center mb-4">
                   <div className="flex">
@@ -149,11 +118,11 @@ const FeaturedCollections = () => {
         </div>
 
         <div className="text-center mt-20">
-          <Link to="/Collections">
-          <button className="relative px-8 py-4 bg-transparent border-2 border-amber-600 text-amber-600 rounded-full font-semibold hover:bg-amber-600 hover:text-white transition-all duration-300 group overflow-hidden">
-            <span className="relative z-10">Explore All Collections</span>
-            <span className="absolute inset-0 bg-amber-600 origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300 z-0"></span>
-          </button>
+          <Link to="/collections">
+            <button className="relative px-8 py-4 bg-transparent border-2 border-amber-600 text-amber-600 rounded-full font-semibold hover:bg-amber-600 hover:text-white transition-all duration-300 group overflow-hidden">
+              <span className="relative z-10">Explore All Collections</span>
+              <span className="absolute inset-0 bg-amber-600 origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300 z-0"></span>
+            </button>
           </Link>
         </div>
       </div>
