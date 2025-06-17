@@ -3,12 +3,25 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import StarIcon from '@mui/icons-material/Star';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
 import { Link } from 'react-router-dom';
-import { getDetailsWithoutLogin } from '../../api/customerAPIs';
+import { addToCart, getDetailsWithoutLogin } from '../../api/customerAPIs';
+import { useSelector } from 'react-redux';
 
 const FeaturedCollections = () => {
   const [collections, setCollections] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const token = useSelector((state) => state.auth.user?.token);
+    const handleAddToCart = async (item) => {
+      try {
+        const res=await addToCart({
+          ID: item.ID,
+        }, token);
+        console.log(res);
+        
+      } catch (error) {
+        console.error(error);
+      }
+    };
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -108,7 +121,9 @@ const FeaturedCollections = () => {
                   )}
                 </div>
                 
-                <button className="w-full flex items-center justify-center py-3 px-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg font-semibold hover:from-amber-600 hover:to-amber-700 transition-all duration-300 transform hover:scale-[1.02] shadow-md hover:shadow-lg group-hover:shadow-amber-200/50">
+                <button
+                onClick={()=>handleAddToCart(item)}
+                 className="w-full flex items-center justify-center py-3 px-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg font-semibold hover:from-amber-600 hover:to-amber-700 transition-all duration-300 transform hover:scale-[1.02] shadow-md hover:shadow-lg group-hover:shadow-amber-200/50">
                   <FlashOnIcon className="mr-2" fontSize="small" />
                   Add to Cart
                 </button>

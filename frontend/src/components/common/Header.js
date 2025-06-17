@@ -8,7 +8,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import DiamondIcon from '@mui/icons-material/Diamond';
 import { Link } from 'react-router-dom';
-import JewelleryDropdown from './JewelleryDropdown'; // Import the new component
+import JewelleryDropdown from './JewelleryDropdown';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -40,12 +40,14 @@ const Header = () => {
     <header className="sticky top-0 z-50 bg-gradient-to-br from-gray-50 to-white shadow-md border-b border-amber-100">
       <div className="container mx-auto px-6 py-3">
         <div className="flex items-center justify-between">
+          <Link to="/">
           <div className="flex items-center gap-2">
             <DiamondIcon className="text-3xl text-amber-600" />
             <span className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-amber-800 bg-clip-text text-transparent tracking-wide font-serif">
               Jewelsphere
             </span>
           </div>
+          </Link>
           <button 
             className="md:hidden p-2 rounded-full hover:bg-amber-50 text-amber-800"
             onClick={handleMenuToggle}
@@ -56,14 +58,11 @@ const Header = () => {
             <a href="#home" className="text-amber-900 hover:text-amber-600 font-medium relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-amber-500 after:to-amber-700 hover:after:w-full after:transition-all after:duration-300 py-2">
               Home
             </a>
-            
-            {/* Replace the Categories link with JewelleryDropdown */}
             <JewelleryDropdown />
-            
             <a href="#collections" className="text-amber-900 hover:text-amber-600 font-medium relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-amber-500 after:to-amber-700 hover:after:w-full after:transition-all after:duration-300 py-2">
               Collections
             </a>
-            <a href="#custom" className="text-amber-900 hover:text-amber-600 font-medium relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-amber-500 after:to-amber-700 hover:after:w-full after:transition-all after:duration-300 py-2">
+            <a href="#CustomOrders" className="text-amber-900 hover:text-amber-600 font-medium relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-amber-500 after:to-amber-700 hover:after:w-full after:transition-all after:duration-300 py-2">
               Custom Orders
             </a>
             <Link to="/ContactUs">
@@ -88,7 +87,7 @@ const Header = () => {
                 </span>
               )}
             </button>
-            
+            <Link to="/cart">
             <button className="p-2 rounded-full hover:bg-amber-50 text-amber-800 hover:text-amber-600 transition-colors relative">
               <ShoppingCartIcon />
               {cartItems > 0 && (
@@ -97,6 +96,7 @@ const Header = () => {
                 </span>
               )}
             </button>
+            </Link>
             
             <div className="relative">
               <button 
