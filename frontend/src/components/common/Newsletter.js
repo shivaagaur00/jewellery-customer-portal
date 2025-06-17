@@ -10,7 +10,7 @@ const Newsletter = () => {
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
-    severity: 'success', // 'success', 'error', 'warning', 'info'
+    severity: 'success',
   });
 
   const handleCloseSnackbar = (event, reason) => {
@@ -20,20 +20,36 @@ const Newsletter = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
+  const isValidEmail = (email) => {
+    // Basic email regex validation
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
   const sendEmailtoBackend = async () => {
     try {
       if (!email.trim()) {
         setSnackbar({
           open: true,
-          message: 'Please enter a valid email',
+          message: 'Please enter your email address',
           severity: 'error',
         });
         return;
       }
+
+      if (!isValidEmail(email)) {
+        setSnackbar({
+          open: true,
+          message: 'Please enter a valid email address',
+          severity: 'error',
+        });
+        return;
+      }
+
       const res = await apiSendEmailtoBackend({ email });
       setSnackbar({
         open: true,
-        message: res.data.message,
+        message: res.data.message || 'Thank you for subscribing!',
         severity: 'success',
       });
       setEmail('');
@@ -41,9 +57,16 @@ const Newsletter = () => {
       console.error(error);
       setSnackbar({
         open: true,
-        message: 'Subscription failed. Please try again.',
+        message: error.response?.data?.message || 'Subscription failed. Please try again.',
         severity: 'error',
       });
+    }
+  };
+
+  // Handle form submission on Enter key
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      sendEmailtoBackend();
     }
   };
 
@@ -73,6 +96,7 @@ const Newsletter = () => {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    onKeyPress={handleKeyPress}
                     placeholder="Your email address"
                     className="px-6 py-4 w-full rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-300 text-gray-800 placeholder-gray-500 shadow-lg transition-all duration-200"
                   />
@@ -96,7 +120,6 @@ const Newsletter = () => {
         </div>
       </div>
 
-      {/* Snackbar Notification */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
