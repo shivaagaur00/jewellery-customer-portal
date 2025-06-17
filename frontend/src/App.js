@@ -1,28 +1,107 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import LandingPage from "./components/LandingPage";
 import ContactUs from "./components/common/ContactUs";
 import Collections from "./components/common/Collections";
-import Login from './components/customerLoginSignup/Login';
-import Signup from './components/customerLoginSignup/Signup';
-import ProtectedRoute from './components/customerLoginSignup/ProtectedRoute';
+import Login from "./components/customerLoginSignup/Login";
+import Signup from "./components/customerLoginSignup/Signup";
+import ProtectedRoute from "./components/customerLoginSignup/ProtectedRoute";
 import Profile from "./components/consumer/pages/Profile";
 import GoldenCart from "./components/consumer/pages/GoldenCart";
+import Header from "./components/common/Header";
+import Footer from "./components/common/Footer";
 
 const App = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/contact-us" element={<ContactUs />} />
-        <Route path="/collections" element={<Collections />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/cart" element={<GoldenCart></GoldenCart>}/>
+        <Route
+          path="/"
+          element={
+            <>
+              <Header />
+              <LandingPage />
+              <Footer />
+            </>
+          }
+        />
+        <Route
+          path="/contactUS"
+          element={
+            <>
+              <Header />
+              <ContactUs />
+              <Footer />
+            </>
+          }
+        />
+        <Route
+          path="/collections"
+          element={
+            <>
+              <Header />
+              <Collections />
+              <Footer />
+            </>
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <>
+              <Header />
+              <Login />
+              <Footer />
+            </>
+          }
+        />
+        <Route
+          path="/signup"
+          element={
+            <>
+              <Header />
+              <Signup />
+              <Footer />
+            </>
+          }
+        />
+        <Route
+          path="/cart"
+          element={
+            <>
+              <Header />
+              <GoldenCart />
+              <Footer />
+            </>
+          }
+        />
         <Route element={<ProtectedRoute />}>
-        <Route path="/profile" element={<Profile />} />
+          <Route
+            path="/profile"
+            element={
+              <>
+                <Header />
+                <Profile />
+                <Footer />
+              </>
+            }
+          />
         </Route>
-        <Route path="*" element={<Navigate to="/"/>} />
+        <Route
+          path="*"
+          element={
+            <>
+              <Header />
+              <LandingPage />
+              <Footer />
+            </>
+          }
+        />
       </Routes>
     </Router>
   );

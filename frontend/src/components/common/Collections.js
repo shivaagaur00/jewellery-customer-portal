@@ -5,7 +5,8 @@ import {
   LocalFireDepartment, FilterList, Search, Close
 } from '@mui/icons-material';
 import { addToCart, getDetailsWithoutLogin } from '../../api/customerAPIs';
-
+import Header from "./Header";
+import Footer from "./Footer";
 const Collections = () => {
   const [collections, setCollections] = useState([]);
   const [filteredCollections, setFilteredCollections] = useState([]);
@@ -134,6 +135,7 @@ const Collections = () => {
   const QuickViewModal = ({ item, onClose }) => {
     if (!item) return null;
     return (
+      <>
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
           <div className="relative">
@@ -206,10 +208,12 @@ const Collections = () => {
           </div>
         </div>
       </div>
+      </>
     );
   };
 
   return (
+          <>
     <div className="bg-gray-50 min-h-screen py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
@@ -456,6 +460,7 @@ const Collections = () => {
         )}
       </div>
     </div>
+    </>
   );
 };
 

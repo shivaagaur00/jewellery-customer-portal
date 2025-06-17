@@ -10,14 +10,12 @@ import Header from "./common/Header";
 function LandingPage() {
   return (
     <div className="font-sans bg-white text-gray-800">
-      <Header></Header>
       <HeroSection />
       <FeaturedCollections />
       <Categories />
       <JewelleryTypes />
       <Newsletter />
       <LiveMetalRates></LiveMetalRates>
-      <Footer />
     </div>
   );
 }

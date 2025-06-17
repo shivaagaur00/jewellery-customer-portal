@@ -114,3 +114,12 @@ export const removeFromCart = async (token) => {
     throw error;
   }
 };
+export const apiSendEmailtoBackend=async(data)=>{
+  try {
+    const res=await axios.post(`${URL}/addEmailForNewsLetter`,data);
+    console.log(res);
+    return res;
+  } catch (error) {
+    console.log(error);
+  }
+}
