@@ -3,15 +3,12 @@ import DiamondIcon from '@mui/icons-material/Diamond';
 import CelebrationIcon from '@mui/icons-material/Celebration';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import WomanIcon from '@mui/icons-material/Woman';
-import ManIcon from '@mui/icons-material/Man';
 import SpaIcon from '@mui/icons-material/Spa';
 import WatchIcon from '@mui/icons-material/Watch';
 import VerifiedIcon from '@mui/icons-material/Verified'; 
 import GppGoodIcon from '@mui/icons-material/GppGood';
-
-import BuildIcon from '@mui/icons-material/Build'; // For Lifetime Maintenance
+import BuildIcon from '@mui/icons-material/Build';
 import DesignServicesIcon from '@mui/icons-material/DesignServices'; 
-
 const JewelleryTypes = () => {
   const categories = [
     {

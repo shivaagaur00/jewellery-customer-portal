@@ -7,6 +7,7 @@ import Login from './components/customerLoginSignup/Login';
 import Signup from './components/customerLoginSignup/Signup';
 import ProtectedRoute from './components/customerLoginSignup/ProtectedRoute';
 import Profile from "./components/consumer/pages/Profile";
+import GoldenCart from "./components/consumer/pages/GoldenCart";
 
 const App = () => {
   return (
@@ -17,6 +18,7 @@ const App = () => {
         <Route path="/collections" element={<Collections />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/cart" element={<GoldenCart></GoldenCart>}/>
         <Route element={<ProtectedRoute />}>
         <Route path="/profile" element={<Profile />} />
         </Route>

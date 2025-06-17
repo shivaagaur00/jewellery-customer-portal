@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import {
   Star, Favorite, FavoriteBorder, NewReleases,
   LocalFireDepartment, FilterList, Search, Close
 } from '@mui/icons-material';
-import { getDetailsWithoutLogin } from '../../api/customerAPIs';
+import { addToCart, getDetailsWithoutLogin } from '../../api/customerAPIs';
+
 const Collections = () => {
   const [collections, setCollections] = useState([]);
   const [filteredCollections, setFilteredCollections] = useState([]);
@@ -21,6 +23,20 @@ const Collections = () => {
   const [wishlist, setWishlist] = useState([]);
   const [quickViewItem, setQuickViewItem] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
+  const token = useSelector((state) => state.auth.user?.token);
+
+  const handleAddToCart = async (item) => {
+    try {
+      const res=await addToCart({
+        ID: item.ID,
+      }, token);
+      console.log(res);
+      
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -35,6 +51,7 @@ const Collections = () => {
     };
     fetchData();
   }, []);
+
   useEffect(() => {
     let result = [...collections];
     if (searchTerm) {
@@ -76,10 +93,10 @@ const Collections = () => {
       default: 
         break;
     }
-
     setFilteredCollections(result);
     setVisibleItems(8); 
   }, [collections, searchTerm, filters, sortOption]);
+
   const toggleWishlist = (itemId) => {
     setWishlist(prev =>
       prev.includes(itemId)
@@ -87,9 +104,11 @@ const Collections = () => {
         : [...prev, itemId]
     );
   };
+
   const loadMore = () => {
     setVisibleItems(prev => prev + 8);
   };
+
   const toggleFilter = (filterType, value) => {
     setFilters(prev => {
       const currentValues = prev[filterType];
@@ -104,43 +123,35 @@ const Collections = () => {
     const values = collections.map(item => item[key]);
     return [...new Set(values)];
   };
+
   const isNewItem = (dateString) => {
     const itemDate = new Date(dateString);
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     return itemDate > thirtyDaysAgo;
   };
+
   const QuickViewModal = ({ item, onClose }) => {
     if (!item) return null;
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
           <div className="relative">
-            <button 
-              onClick={onClose}
-              className="absolute top-4 right-4 bg-white p-2 rounded-full shadow-md z-10"
-            >
+            <button onClick={onClose} className="absolute top-4 right-4 bg-white p-2 rounded-full shadow-md z-10">
               <Close />
             </button>
             <div className="grid md:grid-cols-2 gap-8 p-6">
               <div className="sticky top-0">
-                <img 
-                  src={item.image} 
-                  alt={item.itemName} 
-                  className="w-full h-auto max-h-[60vh] object-contain rounded-lg"
-                />
+                <img src={item.image} alt={item.itemName} className="w-full h-auto max-h-[60vh] object-contain rounded-lg"/>
               </div>
               <div>
                 <h2 className="text-2xl font-bold mb-2">{item.itemName}</h2>
                 <div className="flex items-center mb-4">
                   <div className="flex text-amber-400">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} fontSize="small" />
-                    ))}
+                    {[...Array(5)].map((_, i) => <Star key={i} fontSize="small" />)}
                   </div>
                   <span className="text-sm text-gray-600 ml-2">(24 reviews)</span>
                 </div>
-                
                 <div className="mb-6">
                   <span className="text-2xl font-bold">${item.metalPrice}</span>
                   {item.tags?.includes('sale') && (
@@ -149,7 +160,6 @@ const Collections = () => {
                     </span>
                   )}
                 </div>
-                
                 <div className="space-y-4 mb-6">
                   <div>
                     <h3 className="font-medium">Metal Type</h3>
@@ -166,18 +176,17 @@ const Collections = () => {
                     </p>
                   </div>
                 </div>
-                
                 <button 
                   className={`w-full py-3 px-6 rounded-lg transition duration-300 mb-4 ${
                     item.quantity > 0 
                       ? 'bg-amber-500 hover:bg-amber-600 text-white' 
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
+                  onClick={() => handleAddToCart(item)}
                   disabled={item.quantity <= 0}
                 >
                   {item.quantity > 0 ? 'Add to Cart' : 'Sold Out'}
                 </button>
-                
                 <button 
                   className="w-full py-3 px-6 border border-amber-500 text-amber-500 rounded-lg hover:bg-amber-50 transition duration-300"
                   onClick={() => toggleWishlist(item.ID)}
@@ -222,7 +231,6 @@ const Collections = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          
           <div className="flex gap-2">
             <button 
               className="px-4 py-2 border border-gray-300 rounded-lg flex items-center gap-2"
@@ -230,7 +238,6 @@ const Collections = () => {
             >
               <FilterList /> Filters
             </button>
-            
             <select
               className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-amber-500 focus:border-amber-500"
               value={sortOption}
@@ -263,7 +270,6 @@ const Collections = () => {
                   ))}
                 </div>
               </div>
-              
               <div>
                 <h3 className="font-medium mb-3">Metal Type</h3>
                 <div className="space-y-2">
@@ -280,7 +286,6 @@ const Collections = () => {
                   ))}
                 </div>
               </div>
-              
               <div>
                 <h3 className="font-medium mb-3">Price Range</h3>
                 <div className="mb-4">
@@ -301,7 +306,6 @@ const Collections = () => {
                     <span>₹{filters.priceRange[1]}</span>
                   </div>
                 </div>
-                
                 <div className="space-y-2">
                   <label className="flex items-center">
                     <input
@@ -312,7 +316,6 @@ const Collections = () => {
                     />
                     <span className="ml-2">In Stock Only</span>
                   </label>
-                  
                   <label className="flex items-center">
                     <input
                       type="checkbox"
@@ -407,11 +410,9 @@ const Collections = () => {
                     <span className="text-sm text-gray-600 ml-1">4.5</span>
                   </div>
                 </div>
-                
                 <div className="mb-2">
                   <p className="text-sm text-gray-600">{item.metalType} ({item.itemPurity})</p>
                 </div>
-                
                 <div className="mt-auto">
                   <div className="flex items-center mb-2">
                     <span className="text-lg font-bold text-gray-900">₹{item.metalPrice}</span>
@@ -421,13 +422,13 @@ const Collections = () => {
                       </span>
                     )}
                   </div>
-                  
                   <button 
                     className={`w-full py-2 px-4 rounded-lg transition duration-300 ${
                       item.quantity > 0 
                         ? 'bg-amber-500 hover:bg-amber-600 text-white' 
                         : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     }`}
+                    onClick={() => handleAddToCart(item)}
                     disabled={item.quantity <= 0}
                   >
                     {item.quantity > 0 ? 'Add to Cart' : 'Sold Out'}

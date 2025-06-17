@@ -64,3 +64,53 @@ export const getDetailsWithoutLogin=async()=>{
     console.log(error);
   }
 }
+export const addToCart=async(data,token)=>{
+  try {
+    const res = await axios.post(`${URL}/addToCart`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return res;
+  } catch (error) {
+      console.log(error);
+  }
+}
+export const cartItems = async (token) => {
+  try {
+    const res = await axios.get(`${URL}/getCartItems`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Failed to fetch cart items", error);
+    throw error;
+  }
+};
+export const removeFromCart = async (token) => {
+  try {
+    const res = await axios.get(`${URL}/getCartItems`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Failed to fetch cart items", error);
+    throw error;
+  }
+};export const updateCartItem = async (token) => {
+  try {
+    const res = await axios.get(`${URL}/getCartItems`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Failed to fetch cart items", error);
+    throw error;
+  }
+};
