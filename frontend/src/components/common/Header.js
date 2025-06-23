@@ -68,7 +68,7 @@ const Header = () => {
             <JewelleryDropdown />
 
             <Link to="/collections">
-              {" "}
+              
               <button className="text-amber-900 hover:text-amber-600 font-medium relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-amber-500 after:to-amber-700 hover:after:w-full after:transition-all after:duration-300 py-2">
                 Collections
               </button>

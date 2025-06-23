@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
-import Navbar from "./../Navbar";
 import { editBasicInfo, getCustomer, resetPassword } from "../../../api/customerAPIs";
 import { useSelector } from "react-redux";
-import { current } from "@reduxjs/toolkit";
 import { CameraAlt, Delete } from "@mui/icons-material";
 import { CircularProgress } from "@mui/material";
 import axios from "axios";
@@ -63,10 +61,6 @@ const Profile = () => {
     currentPassword: "",
     newPassword: "",
   });
-  const [editBasicInfoForm, setEditBasicInfoForm] = useState({
-    currentPassword: "",
-    newPassword: "",
-  });
   const handleInputChangePassword = (e) => {
     const { name, value } = e.target;
     setResetPasswordForm((prev) => ({
@@ -90,7 +84,7 @@ const Profile = () => {
         },
         token
       );
-      if (res.message == "Password changed successfully")
+      if (res.message === "Password changed successfully")
         setShowResetForm(false);
     } catch (error) {
       console.log("Password reset failed:", error);
@@ -134,7 +128,7 @@ const Profile = () => {
         token
       );
       console.log(res);
-      if (res.message == "Details Saved Successfully")
+      if (res.message === "Details Saved Successfully")
         setBasicInfoForm(false);
     } catch (error) {
       console.log("Failed to Save Details", error);
@@ -160,7 +154,6 @@ const Profile = () => {
   if (loading) {
     return (
       <>
-        <Navbar />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-amber-500 mx-auto"></div>
@@ -173,7 +166,6 @@ const Profile = () => {
   if (error) {
     return (
       <>
-        <Navbar />
         <div className="container mx-auto px-4 py-8">
           <div
             className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
@@ -189,7 +181,6 @@ const Profile = () => {
   if (!customer) {
     return (
       <>
-        <Navbar />
         <div className="container mx-auto px-4 py-8">
           <div className="bg-white rounded-lg shadow-md p-6 text-center">
             <h2 className="text-xl font-semibold mb-4">
@@ -208,7 +199,6 @@ const Profile = () => {
 
   return (
     <>
-      <Navbar />
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between bg-white rounded-lg shadow-md p-6 mb-6">
           <div className="flex flex-col md:flex-row items-center">
