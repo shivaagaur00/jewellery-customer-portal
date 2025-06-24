@@ -18,7 +18,7 @@ import {
   Star as SpecialIcon
 } from '@mui/icons-material';
 import { useSelector } from 'react-redux';
-import { addOrder } from '../../../api/customerAPIs';
+import { addOrder, fetchCustomOrders } from '../../../api/customerAPIs';
 
 const loadRazorpay = () => {
   return new Promise((resolve) => {
@@ -34,56 +34,6 @@ const loadRazorpay = () => {
   });
 };
 
-const customerOrders = [
-  {
-    id: "ORD-001",
-    date: "2023-05-15",
-    item: "Gold Wedding Ring",
-    metal: "Gold",
-    weight: "10g",
-    purity: "18K",
-    status: "completed",
-    price: "$500",
-    deposited: "$200",
-    balance: "$300",
-    delivery: "2023-07-15",
-    transactions: [
-      { date: "2023-05-15", amount: "$100" },
-      { date: "2023-06-01", amount: "$100" }
-    ]
-  },
-  {
-    id: "ORD-002",
-    date: "2023-06-01",
-    item: "Silver Bracelet",
-    metal: "Silver",
-    weight: "25g",
-    purity: "925",
-    status: "in-progress",
-    price: "$62.50",
-    deposited: "$30",
-    balance: "$32.50",
-    delivery: "2023-07-10",
-    transactions: [
-      { date: "2023-06-01", amount: "$30" }
-    ]
-  },
-  {
-    id: "ORD-003",
-    date: "2023-06-20",
-    item: "Platinum Earrings",
-    metal: "Platinum",
-    weight: "5g",
-    purity: "950",
-    status: "pending",
-    price: "$150",
-    deposited: "$0",
-    balance: "$150",
-    delivery: "2023-08-01",
-    transactions: []
-  }
-];
-
 const metalTypes = ["Gold", "Silver", "Platinum", "Palladium"];
 const purityOptions = {
   Gold: ["24K", "22K", "18K", "14K", "10K"],
@@ -94,7 +44,7 @@ const purityOptions = {
 
 const StatusBadge = ({ status }) => {
   const getStatusDetails = () => {
-    switch (status) {
+    switch (status.toLowerCase()) {
       case "completed":
         return { icon: <CompletedIcon className="text-emerald-500" />, text: "Completed", classes: "bg-emerald-100 text-emerald-800" };
       case "in-progress":
@@ -116,8 +66,27 @@ const StatusBadge = ({ status }) => {
   );
 };
 
+const formatDate = (dateString) => {
+  const options = { year: 'numeric', month: 'short', day: 'numeric' };
+  return new Date(dateString).toLocaleDateString(undefined, options);
+};
+
 const CustomOrder = () => {
+  const [customerOrders, setCustomerOrders] = useState([]);
   const token = useSelector((state) => state.auth.user?.token);
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const res = await fetchCustomOrders(token);
+        setCustomerOrders(res.data || []);
+      } catch (error) {
+        console.error("Failed to fetch orders:", error);
+      }
+    };
+    if (token) fetchOrders();
+  }, [token]);
+
   const [activeTab, setActiveTab] = useState('all');
   const [showNewOrder, setShowNewOrder] = useState(false);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
@@ -131,16 +100,16 @@ const CustomOrder = () => {
   const [imageError, setImageError] = useState(null);
   
   const [orderForm, setOrderForm] = useState({
-    metal: "",
-    item: "",
-    description: "",
-    weight: "",
-    purity: "",
-    price: "",
-    deposit: "",
-    delivery: "",
+    metalType: "",
+    itemName: "",
+    orderDescription: "",
+    weightExpected: "",
+    itemPurity: "",
+    priceExpected: "",
+    depositedAmount: "",
+    expectedDeliverDate: "",
     notes: "",
-    samplePhoto: ""
+    image: ""
   });
 
   useEffect(() => {
@@ -151,9 +120,9 @@ const CustomOrder = () => {
 
   const filteredOrders = customerOrders.filter(order => {
     if (activeTab === 'all') return true;
-    if (activeTab === 'in-progress') return order.status === "in-progress";
-    if (activeTab === 'completed') return order.status === "completed";
-    if (activeTab === 'pending') return order.status === "pending";
+    if (activeTab === 'in-progress') return order.status.toLowerCase() === "in-progress";
+    if (activeTab === 'completed') return order.status.toLowerCase() === "completed";
+    if (activeTab === 'pending') return order.status.toLowerCase() === "pending";
     return true;
   });
 
@@ -165,16 +134,16 @@ const CustomOrder = () => {
     setShowNewOrder(true);
     setFormStep(1);
     setOrderForm({
-      metal: "",
-      item: "",
-      description: "",
-      weight: "",
-      purity: "",
-      price: "",
-      deposit: "",
-      delivery: "",
+      metalType: "",
+      itemName: "",
+      orderDescription: "",
+      weightExpected: "",
+      itemPurity: "",
+      priceExpected: "",
+      depositedAmount: "",
+      expectedDeliverDate: "",
       notes: "",
-      samplePhoto: ""
+      image: ""
     });
     setImagePreview(null);
   };
@@ -199,14 +168,15 @@ const CustomOrder = () => {
     }));
   };
 
-  const handleSubmitOrder = () => {
+  const handleSubmitOrder = async () => {
     try {
-      const res=addOrder({orderForm},token);
-      console.log(res);
+      await addOrder(orderForm, token);
+      const res = await fetchCustomOrders(token);
+      setCustomerOrders(res.data || []);
+      setShowNewOrder(false);
     } catch (error) {
-      console.log(error);
+      console.error("Failed to submit order:", error);
     }
-    setShowNewOrder(false);
   };
 
   const handleViewDetails = (order) => {
@@ -244,7 +214,7 @@ const CustomOrder = () => {
       
       setOrderForm(prev => ({
         ...prev,
-        samplePhoto: response.data.secure_url,
+        image: response.data.secure_url,
       }));
       
     } catch (err) {
@@ -265,14 +235,15 @@ const CustomOrder = () => {
     setPaymentProcessing(true);
     
     try {
-      const amountInPaise = parseFloat(order.balance.replace('$', '')) * 100;
+      const balance = order.priceExpected - order.depositedAmount;
+      const amountInPaise = balance * 100;
       
       const options = {
         key: 'YOUR_RAZORPAY_KEY_ID',
         amount: amountInPaise.toString(),
         currency: 'INR',
         name: 'Jewelry Store',
-        description: `Payment for ${order.item}`,
+        description: `Payment for ${order.itemName}`,
         image: 'https://example.com/your_logo.jpg',
         order_id: 'order_' + Math.random().toString(36).substr(2, 9),
         handler: function(response) {
@@ -282,11 +253,11 @@ const CustomOrder = () => {
         },
         prefill: {
           name: 'Customer Name',
-          email: 'customer@example.com',
+          email: order.customerID,
           contact: '9999999999'
         },
         notes: {
-          order_id: order.id
+          order_id: order._id
         },
         theme: {
           color: '#F59E0B'
@@ -357,24 +328,35 @@ const CustomOrder = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredOrders.map(order => (
-            <div key={order.id} className="bg-white rounded-xl shadow-md overflow-hidden transition-transform hover:-translate-y-1 border-t-4 border-amber-500">
+            <div key={order._id} className="bg-white rounded-xl shadow-md overflow-hidden transition-transform hover:-translate-y-1 border-t-4 border-amber-500">
               <div className="p-4 flex justify-between items-center bg-gray-50 border-b">
-                <span className="font-medium text-amber-700">{order.id}</span>
+                <span className="font-medium text-amber-700">{order._id.slice(-6)}</span>
                 <StatusBadge status={order.status} />
               </div>
+ <div className="relative h-28 w-full overflow-hidden rounded-lg bg-gray-100">
+  <img 
+    src={order.image || '/placeholder-jewelry.jpg'} 
+    alt={order.itemName}
+    className="absolute inset-0 w-full h-full object-contain p-1 transition-transform duration-300 hover:scale-105"
+    onError={(e) => {
+      e.target.onerror = null; 
+      e.target.src = '/placeholder-jewelry.jpg'
+    }}
+  />
+</div>
               <div className="p-5">
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">{order.item}</h3>
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">{order.itemName}</h3>
                 <p className="text-gray-600 mb-4">
-                  <span className="font-medium">{order.metal} {order.purity}</span> • {order.weight}
+                  <span className="font-medium">{order.metalType} {order.itemPurity}</span> • {order.weightExpected}gm
                 </p>
                 <div className="flex justify-between text-sm text-gray-500">
                   <span className="flex items-center gap-1">
                     <CalendarIcon className="text-amber-600" />
-                    {order.date}
+                    {formatDate(order.date)}
                   </span>
                   <span className="flex items-center gap-1">
                     <MoneyIcon className="text-amber-600" />
-                    {order.price}
+                    ${order.priceExpected}
                   </span>
                 </div>
               </div>
@@ -386,7 +368,7 @@ const CustomOrder = () => {
                   <DetailsIcon />
                   Details
                 </button>
-                {order.status === 'in-progress' && (
+                {order.status.toLowerCase() === 'in-progress' && (
                   <button 
                     className="flex-1 py-3 flex items-center justify-center gap-1 bg-amber-50 text-amber-700 font-medium hover:bg-amber-100 transition-colors"
                     onClick={() => initiatePayment(order)}
@@ -416,7 +398,6 @@ const CustomOrder = () => {
                   <CloseIcon />
                 </button>
               </div>
-
               <div className="p-5">
                 <div className="flex justify-between mb-8">
                   {[1, 2, 3].map((step) => (
@@ -441,8 +422,8 @@ const CustomOrder = () => {
                         Metal Type
                       </label>
                       <select
-                        name="metal"
-                        value={orderForm.metal}
+                        name="metalType"
+                        value={orderForm.metalType}
                         onChange={handleFormChange}
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                         required
@@ -454,21 +435,21 @@ const CustomOrder = () => {
                       </select>
                     </div>
 
-                    {orderForm.metal && (
+                    {orderForm.metalType && (
                       <div>
                         <label className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
                           <OrderIcon className="text-amber-600" />
                           Purity
                         </label>
                         <select
-                          name="purity"
-                          value={orderForm.purity}
+                          name="itemPurity"
+                          value={orderForm.itemPurity}
                           onChange={handleFormChange}
                           className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                           required
                         >
                           <option value="">Select purity</option>
-                          {purityOptions[orderForm.metal]?.map(option => (
+                          {purityOptions[orderForm.metalType]?.map(option => (
                             <option key={option} value={option}>{option}</option>
                           ))}
                         </select>
@@ -482,8 +463,8 @@ const CustomOrder = () => {
                       </label>
                       <input
                         type="text"
-                        name="item"
-                        value={orderForm.item}
+                        name="itemName"
+                        value={orderForm.itemName}
                         onChange={handleFormChange}
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                         required
@@ -496,8 +477,8 @@ const CustomOrder = () => {
                         Description
                       </label>
                       <textarea
-                        name="description"
-                        value={orderForm.description}
+                        name="orderDescription"
+                        value={orderForm.orderDescription}
                         onChange={handleFormChange}
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 min-h-[100px]"
                         required
@@ -512,8 +493,22 @@ const CustomOrder = () => {
                         </label>
                         <input
                           type="number"
-                          name="weight"
-                          value={orderForm.weight}
+                          name="weightExpected"
+                          value={orderForm.weightExpected}
+                          onChange={handleFormChange}
+                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                          <MoneyIcon className="text-amber-600" />
+                          Expected Price ($)
+                        </label>
+                        <input
+                          type="number"
+                          name="priceExpected"
+                          value={orderForm.priceExpected}
                           onChange={handleFormChange}
                           className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                           required
@@ -578,8 +573,8 @@ const CustomOrder = () => {
                       </label>
                       <input
                         type="number"
-                        name="deposit"
-                        value={orderForm.deposit}
+                        name="depositedAmount"
+                        value={orderForm.depositedAmount}
                         onChange={handleFormChange}
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                         required
@@ -593,8 +588,8 @@ const CustomOrder = () => {
                       </label>
                       <input
                         type="date"
-                        name="delivery"
-                        value={orderForm.delivery}
+                        name="expectedDeliverDate"
+                        value={orderForm.expectedDeliverDate}
                         onChange={handleFormChange}
                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                         required
@@ -626,15 +621,15 @@ const CustomOrder = () => {
                     <div className="bg-gray-50 p-4 rounded-lg">
                       <h4 className="font-medium text-gray-800 mb-3">Item Details</h4>
                       <div className="space-y-2 text-sm">
-                        <p><span className="font-medium">Metal:</span> {orderForm.metal} {orderForm.purity}</p>
-                        <p><span className="font-medium">Item:</span> {orderForm.item}</p>
-                        <p><span className="font-medium">Description:</span> {orderForm.description}</p>
-                        <p><span className="font-medium">Weight:</span> {orderForm.weight}g</p>
-                        {orderForm.samplePhoto && (
+                        <p><span className="font-medium">Metal:</span> {orderForm.metalType} {orderForm.itemPurity}</p>
+                        <p><span className="font-medium">Item:</span> {orderForm.itemName}</p>
+                        <p><span className="font-medium">Description:</span> {orderForm.orderDescription}</p>
+                        <p><span className="font-medium">Weight:</span> {orderForm.weightExpected}g</p>
+                        {orderForm.image && (
                           <div className="mt-2">
                             <p className="font-medium">Sample Photo:</p>
                             <img 
-                              src={orderForm.samplePhoto} 
+                              src={orderForm.image} 
                               alt="Sample" 
                               className="w-32 h-32 object-cover rounded border mt-1"
                             />
@@ -646,16 +641,16 @@ const CustomOrder = () => {
                     <div className="bg-gray-50 p-4 rounded-lg">
                       <h4 className="font-medium text-gray-800 mb-3">Financial Details</h4>
                       <div className="space-y-2 text-sm">
-                        <p><span className="font-medium">Expected Price:</span> ${orderForm.price}</p>
-                        <p><span className="font-medium">Deposit Amount:</span> ${orderForm.deposit}</p>
-                        <p><span className="font-medium">Balance Due:</span> ${(orderForm.price - orderForm.deposit) || 0}</p>
+                        <p><span className="font-medium">Expected Price:</span> ${orderForm.priceExpected}</p>
+                        <p><span className="font-medium">Deposit Amount:</span> ${orderForm.depositedAmount}</p>
+                        <p><span className="font-medium">Balance Due:</span> ${(orderForm.priceExpected - orderForm.depositedAmount) || 0}</p>
                       </div>
                     </div>
 
                     <div className="bg-gray-50 p-4 rounded-lg">
                       <h4 className="font-medium text-gray-800 mb-3">Delivery</h4>
                       <div className="space-y-2 text-sm">
-                        <p><span className="font-medium">Expected Delivery:</span> {orderForm.delivery || "Not specified"}</p>
+                        <p><span className="font-medium">Expected Delivery:</span> {orderForm.expectedDeliverDate || "Not specified"}</p>
                         {orderForm.notes && (
                           <p><span className="font-medium">Special Instructions:</span> {orderForm.notes}</p>
                         )}
@@ -704,7 +699,7 @@ const CustomOrder = () => {
             <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border-t-4 border-amber-500">
               <div className="sticky top-0 bg-white p-5 border-b flex justify-between items-center">
                 <h2 className="text-xl font-bold text-gray-800">
-                  Order Details - {selectedOrder.id}
+                  Order Details - {selectedOrder._id.slice(-6)}
                 </h2>
                 <button 
                   onClick={() => setShowOrderDetails(false)}
@@ -720,9 +715,9 @@ const CustomOrder = () => {
                     <OrderIcon className="text-amber-600 text-3xl" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-800">{selectedOrder.item}</h3>
+                    <h3 className="text-xl font-semibold text-gray-800">{selectedOrder.itemName}</h3>
                     <p className="text-gray-600">
-                      {selectedOrder.metal} {selectedOrder.purity} • {selectedOrder.weight}
+                      {selectedOrder.metalType} {selectedOrder.itemPurity} • {selectedOrder.weightExpected}gm
                     </p>
                     <div className="mt-2">
                       <StatusBadge status={selectedOrder.status} />
@@ -735,7 +730,7 @@ const CustomOrder = () => {
                     <CalendarIcon className="text-amber-600" />
                     <div>
                       <p className="text-xs text-gray-500">Order Date</p>
-                      <p className="font-medium">{selectedOrder.date}</p>
+                      <p className="font-medium">{formatDate(selectedOrder.date)}</p>
                     </div>
                   </div>
 
@@ -743,7 +738,7 @@ const CustomOrder = () => {
                     <InProgressIcon className="text-amber-600" />
                     <div>
                       <p className="text-xs text-gray-500">Expected Delivery</p>
-                      <p className="font-medium">{selectedOrder.delivery}</p>
+                      <p className="font-medium">{formatDate(selectedOrder.expectedDeliverDate)}</p>
                     </div>
                   </div>
 
@@ -751,7 +746,7 @@ const CustomOrder = () => {
                     <MoneyIcon className="text-amber-600" />
                     <div>
                       <p className="text-xs text-gray-500">Total Price</p>
-                      <p className="font-medium">{selectedOrder.price}</p>
+                      <p className="font-medium">${selectedOrder.priceExpected}</p>
                     </div>
                   </div>
 
@@ -759,9 +754,33 @@ const CustomOrder = () => {
                     <PaymentIcon className="text-amber-600" />
                     <div>
                       <p className="text-xs text-gray-500">Deposit Paid</p>
-                      <p className="font-medium">{selectedOrder.deposited}</p>
+                      <p className="font-medium">${selectedOrder.depositedAmount}</p>
                     </div>
                   </div>
+                </div>
+
+                {selectedOrder.image && (
+                  <div className="mb-6">
+                    <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                      <DescriptionIcon className="text-amber-600" />
+                      Sample Image
+                    </h4>
+                    <div className="w-full max-w-xs border rounded-lg overflow-hidden">
+                      <img 
+                        src={selectedOrder.image} 
+                        alt="Order sample" 
+                        className="w-full h-auto object-cover"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div className="mb-6">
+                  <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                    <DescriptionIcon className="text-amber-600" />
+                    Description
+                  </h4>
+                  <p className="text-gray-600">{selectedOrder.orderDescription}</p>
                 </div>
 
                 <div className="mb-6">
@@ -769,12 +788,12 @@ const CustomOrder = () => {
                     <MoneyIcon className="text-amber-600" />
                     Payment History
                   </h4>
-                  {selectedOrder.transactions.length > 0 ? (
+                  {selectedOrder.transactions && selectedOrder.transactions.length > 0 ? (
                     <div className="border rounded-lg overflow-hidden">
                       {selectedOrder.transactions.map((txn, index) => (
                         <div key={index} className="p-3 border-b last:border-b-0 flex justify-between">
-                          <span>{txn.date}</span>
-                          <span className="font-medium text-amber-700">{txn.amount}</span>
+                          <span>{formatDate(txn.date)}</span>
+                          <span className="font-medium text-amber-700">${txn.amount}</span>
                         </div>
                       ))}
                     </div>
@@ -785,7 +804,7 @@ const CustomOrder = () => {
               </div>
 
               <div className="sticky bottom-0 bg-white p-4 border-t">
-                {selectedOrder.status === 'in-progress' && (
+                {selectedOrder.status.toLowerCase() === 'in-progress' && (
                   <button 
                     className="w-full bg-amber-600 text-white py-2 rounded-lg shadow hover:bg-amber-700 transition-colors flex items-center justify-center gap-2"
                     onClick={() => initiatePayment(selectedOrder)}
@@ -796,7 +815,7 @@ const CustomOrder = () => {
                     ) : (
                       <>
                         <PaymentIcon />
-                        Make Payment
+                        Make Payment (${selectedOrder.priceExpected - selectedOrder.depositedAmount})
                       </>
                     )}
                   </button>
