@@ -123,3 +123,15 @@ export const apiSendEmailtoBackend=async(data)=>{
     console.log(error);
   }
 }
+export const addOrder=async(data,token)=>{
+  try {
+    console.log(data);
+    const res=await axios.post(`${URL}/addCutomerOrder`,data,{
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+  }
+}

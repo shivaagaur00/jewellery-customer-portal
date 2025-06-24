@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import {
   AddCircle as AddIcon,
   CheckCircle as CompletedIcon,
@@ -16,6 +17,23 @@ import {
   Scale as WeightIcon,
   Star as SpecialIcon
 } from '@mui/icons-material';
+import { useSelector } from 'react-redux';
+import { addOrder } from '../../../api/customerAPIs';
+
+const loadRazorpay = () => {
+  return new Promise((resolve) => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.onload = () => {
+      resolve(window.Razorpay);
+    };
+    script.onerror = () => {
+      resolve(null);
+    };
+    document.body.appendChild(script);
+  });
+};
+
 const customerOrders = [
   {
     id: "ORD-001",
@@ -99,11 +117,18 @@ const StatusBadge = ({ status }) => {
 };
 
 const CustomOrder = () => {
+  const token = useSelector((state) => state.auth.user?.token);
   const [activeTab, setActiveTab] = useState('all');
   const [showNewOrder, setShowNewOrder] = useState(false);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [formStep, setFormStep] = useState(1);
+  const [razorpayLoaded, setRazorpayLoaded] = useState(false);
+  const [paymentProcessing, setPaymentProcessing] = useState(false);
+  const [isImageLoading, setIsImageLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [imageError, setImageError] = useState(null);
   
   const [orderForm, setOrderForm] = useState({
     metal: "",
@@ -114,8 +139,15 @@ const CustomOrder = () => {
     price: "",
     deposit: "",
     delivery: "",
-    notes: ""
+    notes: "",
+    samplePhoto: ""
   });
+
+  useEffect(() => {
+    loadRazorpay().then(() => {
+      setRazorpayLoaded(true);
+    });
+  }, []);
 
   const filteredOrders = customerOrders.filter(order => {
     if (activeTab === 'all') return true;
@@ -141,8 +173,10 @@ const CustomOrder = () => {
       price: "",
       deposit: "",
       delivery: "",
-      notes: ""
+      notes: "",
+      samplePhoto: ""
     });
+    setImagePreview(null);
   };
 
   const handleCloseNewOrder = () => {
@@ -166,9 +200,13 @@ const CustomOrder = () => {
   };
 
   const handleSubmitOrder = () => {
-    console.log("Order submitted:", orderForm);
+    try {
+      const res=addOrder({orderForm},token);
+      console.log(res);
+    } catch (error) {
+      console.log(error);
+    }
     setShowNewOrder(false);
-    // In a real app, you would send this to your backend
   };
 
   const handleViewDetails = (order) => {
@@ -176,10 +214,103 @@ const CustomOrder = () => {
     setShowOrderDetails(true);
   };
 
+  const handleImageUpload = async (file) => {
+    if (!file) return;
+    
+    try {
+      setIsImageLoading(true);
+      setImageError(null);
+      
+      const reader = new FileReader();
+      reader.onloadend = () => setImagePreview(reader.result);
+      reader.readAsDataURL(file);
+      
+      const cloudinaryFormData = new FormData();
+      cloudinaryFormData.append("file", file);
+      cloudinaryFormData.append("upload_preset", "ml_default");
+      
+      const response = await axios.post(
+        "https://api.cloudinary.com/v1_1/dthriaot4/image/upload",
+        cloudinaryFormData,
+        {
+          onUploadProgress: (progressEvent) => {
+            const percentCompleted = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total
+            );
+            setUploadProgress(percentCompleted);
+          },
+        }
+      );
+      
+      setOrderForm(prev => ({
+        ...prev,
+        samplePhoto: response.data.secure_url,
+      }));
+      
+    } catch (err) {
+      setImageError("Failed to upload image. Please try again.");
+      console.error(err);
+    } finally {
+      setIsImageLoading(false);
+      setUploadProgress(0);
+    }
+  };
+
+  const initiatePayment = async (order) => {
+    if (!razorpayLoaded) {
+      alert('Payment gateway is still loading. Please try again in a moment.');
+      return;
+    }
+
+    setPaymentProcessing(true);
+    
+    try {
+      const amountInPaise = parseFloat(order.balance.replace('$', '')) * 100;
+      
+      const options = {
+        key: 'YOUR_RAZORPAY_KEY_ID',
+        amount: amountInPaise.toString(),
+        currency: 'INR',
+        name: 'Jewelry Store',
+        description: `Payment for ${order.item}`,
+        image: 'https://example.com/your_logo.jpg',
+        order_id: 'order_' + Math.random().toString(36).substr(2, 9),
+        handler: function(response) {
+          alert(`Payment successful! Payment ID: ${response.razorpay_payment_id}`);
+          setPaymentProcessing(false);
+          setShowOrderDetails(false);
+        },
+        prefill: {
+          name: 'Customer Name',
+          email: 'customer@example.com',
+          contact: '9999999999'
+        },
+        notes: {
+          order_id: order.id
+        },
+        theme: {
+          color: '#F59E0B'
+        }
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+      
+      rzp.on('payment.failed', function(response) {
+        alert(`Payment failed: ${response.error.description}`);
+        setPaymentProcessing(false);
+      });
+
+    } catch (error) {
+      console.error('Payment error:', error);
+      alert('Error initiating payment. Please try again.');
+      setPaymentProcessing(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <h1 className="text-3xl font-bold text-amber-800 flex items-center gap-2">
             <OrderIcon className="text-amber-600" />
@@ -194,7 +325,6 @@ const CustomOrder = () => {
           </button>
         </header>
 
-        {/* Tabs */}
         <div className="flex flex-wrap gap-2 mb-6 border-b border-gray-200 pb-4">
           <button
             onClick={() => handleTabChange('all')}
@@ -225,7 +355,6 @@ const CustomOrder = () => {
           </button>
         </div>
 
-        {/* Orders Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredOrders.map(order => (
             <div key={order.id} className="bg-white rounded-xl shadow-md overflow-hidden transition-transform hover:-translate-y-1 border-t-4 border-amber-500">
@@ -258,7 +387,10 @@ const CustomOrder = () => {
                   Details
                 </button>
                 {order.status === 'in-progress' && (
-                  <button className="flex-1 py-3 flex items-center justify-center gap-1 bg-amber-50 text-amber-700 font-medium hover:bg-amber-100 transition-colors">
+                  <button 
+                    className="flex-1 py-3 flex items-center justify-center gap-1 bg-amber-50 text-amber-700 font-medium hover:bg-amber-100 transition-colors"
+                    onClick={() => initiatePayment(order)}
+                  >
                     <PaymentIcon />
                     Pay
                   </button>
@@ -268,7 +400,6 @@ const CustomOrder = () => {
           ))}
         </div>
 
-        {/* New Order Modal */}
         {showNewOrder && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border-t-4 border-amber-500">
@@ -287,7 +418,6 @@ const CustomOrder = () => {
               </div>
 
               <div className="p-5">
-                {/* Step indicator */}
                 <div className="flex justify-between mb-8">
                   {[1, 2, 3].map((step) => (
                     <div key={step} className="flex flex-col items-center">
@@ -303,11 +433,10 @@ const CustomOrder = () => {
                   ))}
                 </div>
 
-                {/* Form Steps */}
                 {formStep === 1 && (
                   <div className="space-y-4">
                     <div>
-                      <label className=" text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                      <label className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
                         <OrderIcon className="text-amber-600" />
                         Metal Type
                       </label>
@@ -327,7 +456,7 @@ const CustomOrder = () => {
 
                     {orderForm.metal && (
                       <div>
-                        <label className=" text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                        <label className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
                           <OrderIcon className="text-amber-600" />
                           Purity
                         </label>
@@ -347,7 +476,7 @@ const CustomOrder = () => {
                     )}
 
                     <div>
-                      <label className=" text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                      <label className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
                         <DescriptionIcon className="text-amber-600" />
                         Item Name
                       </label>
@@ -362,7 +491,7 @@ const CustomOrder = () => {
                     </div>
 
                     <div>
-                      <label className=" text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                      <label className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
                         <DescriptionIcon className="text-amber-600" />
                         Description
                       </label>
@@ -377,7 +506,7 @@ const CustomOrder = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className=" text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                        <label className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
                           <WeightIcon className="text-amber-600" />
                           Weight (g)
                         </label>
@@ -390,20 +519,52 @@ const CustomOrder = () => {
                           required
                         />
                       </div>
-                      <div>
-                        <label className=" text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
-                          <MoneyIcon className="text-amber-600" />
-                          Expected Price ($)
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                        <DescriptionIcon className="text-amber-600" />
+                        Sample Photo (Optional)
+                      </label>
+                      <div className="mt-1 flex items-center gap-4">
+                        <label className="cursor-pointer bg-amber-50 text-amber-700 px-4 py-2 rounded-lg border border-amber-200 hover:bg-amber-100 transition-colors">
+                          <input 
+                            type="file" 
+                            className="hidden" 
+                            accept="image/*"
+                            onChange={(e) => handleImageUpload(e.target.files[0])}
+                          />
+                          Upload Photo
                         </label>
-                        <input
-                          type="number"
-                          name="price"
-                          value={orderForm.price}
-                          onChange={handleFormChange}
-                          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-                          required
-                        />
+                        {isImageLoading && (
+                          <div className="w-full max-w-xs">
+                            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-amber-600 transition-all duration-300" 
+                                style={{ width: `${uploadProgress}%` }}
+                              ></div>
+                            </div>
+                            <p className="text-xs text-gray-500 mt-1">
+                              Uploading... {uploadProgress}%
+                            </p>
+                          </div>
+                        )}
                       </div>
+                      {imageError && (
+                        <p className="mt-1 text-sm text-red-600">{imageError}</p>
+                      )}
+                      {imagePreview && (
+                        <div className="mt-3">
+                          <p className="text-sm font-medium text-gray-700 mb-1">Preview:</p>
+                          <div className="w-32 h-32 border rounded-lg overflow-hidden">
+                            <img 
+                              src={imagePreview} 
+                              alt="Sample preview" 
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -411,7 +572,7 @@ const CustomOrder = () => {
                 {formStep === 2 && (
                   <div className="space-y-4">
                     <div>
-                      <label className=" text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                      <label className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
                         <MoneyIcon className="text-amber-600" />
                         Deposit Amount ($)
                       </label>
@@ -426,7 +587,7 @@ const CustomOrder = () => {
                     </div>
 
                     <div>
-                      <label className=" text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                      <label className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
                         <CalendarIcon className="text-amber-600" />
                         Expected Delivery Date
                       </label>
@@ -441,7 +602,7 @@ const CustomOrder = () => {
                     </div>
 
                     <div>
-                      <label className=" text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                      <label className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
                         <SpecialIcon className="text-amber-600" />
                         Special Instructions
                       </label>
@@ -469,6 +630,16 @@ const CustomOrder = () => {
                         <p><span className="font-medium">Item:</span> {orderForm.item}</p>
                         <p><span className="font-medium">Description:</span> {orderForm.description}</p>
                         <p><span className="font-medium">Weight:</span> {orderForm.weight}g</p>
+                        {orderForm.samplePhoto && (
+                          <div className="mt-2">
+                            <p className="font-medium">Sample Photo:</p>
+                            <img 
+                              src={orderForm.samplePhoto} 
+                              alt="Sample" 
+                              className="w-32 h-32 object-cover rounded border mt-1"
+                            />
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -528,7 +699,6 @@ const CustomOrder = () => {
           </div>
         )}
 
-        {/* Order Details Modal */}
         {showOrderDetails && selectedOrder && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border-t-4 border-amber-500">
@@ -616,9 +786,19 @@ const CustomOrder = () => {
 
               <div className="sticky bottom-0 bg-white p-4 border-t">
                 {selectedOrder.status === 'in-progress' && (
-                  <button className="w-full bg-amber-600 text-white py-2 rounded-lg shadow hover:bg-amber-700 transition-colors flex items-center justify-center gap-2">
-                    <PaymentIcon />
-                    Make Payment
+                  <button 
+                    className="w-full bg-amber-600 text-white py-2 rounded-lg shadow hover:bg-amber-700 transition-colors flex items-center justify-center gap-2"
+                    onClick={() => initiatePayment(selectedOrder)}
+                    disabled={paymentProcessing}
+                  >
+                    {paymentProcessing ? (
+                      'Processing...'
+                    ) : (
+                      <>
+                        <PaymentIcon />
+                        Make Payment
+                      </>
+                    )}
                   </button>
                 )}
               </div>

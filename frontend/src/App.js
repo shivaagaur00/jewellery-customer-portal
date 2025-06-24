@@ -30,16 +30,7 @@ const App = () => {
             </>
           }
         />
-        <Route
-          path="/customOrder"
-          element={
-            <>
-              <Header />
-              <CustomOrder />
-              <Footer />
-            </>
-          }
-        />
+        
         <Route
           path="/contactUS"
           element={
@@ -101,6 +92,16 @@ const App = () => {
               </>
             }
           />
+          <Route
+          path="/customOrder"
+          element={
+            <>
+              <Header />
+              <CustomOrder />
+              <Footer />
+            </>
+          }
+        />
         </Route>
         <Route
           path="*"
