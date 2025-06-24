@@ -19,7 +19,6 @@ const Header = () => {
   const { isAuthenticated } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
 
-  // Close menus when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (isMenuOpen && !event.target.closest(".mobile-menu-container")) {
@@ -58,7 +57,6 @@ const Header = () => {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    // Handle search functionality here
     console.log("Searching for:", searchQuery);
     setIsSearchOpen(false);
     setSearchQuery("");
@@ -67,9 +65,7 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-50 bg-gradient-to-br from-gray-50 to-white shadow-md border-b border-amber-100">
       <div className="container mx-auto px-4 sm:px-6 py-3">
-        {/* Top Bar */}
         <div className="flex items-center justify-between">
-          {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
             <DiamondIcon className="text-3xl text-amber-600" />
             <span className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-amber-800 bg-clip-text text-transparent tracking-wide font-serif">
@@ -77,7 +73,6 @@ const Header = () => {
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
             <Link
               to="/"
@@ -106,7 +101,6 @@ const Header = () => {
             </Link>
           </nav>
 
-          {/* Action Buttons */}
           <div className="flex items-center gap-4">
             <button
               onClick={handleSearchToggle}
@@ -132,7 +126,6 @@ const Header = () => {
                     aria-label="Cart"
                   >
                     <ShoppingCartIcon />
-                    {/* Cart badge would go here */}
                   </button>
                 </Link>
               </>
@@ -188,7 +181,6 @@ const Header = () => {
               )}
             </div>
 
-            {/* Mobile Menu Button */}
             <button
               className="md:hidden p-2 rounded-full hover:bg-amber-50 text-amber-800"
               onClick={handleMenuToggle}
@@ -199,7 +191,6 @@ const Header = () => {
           </div>
         </div>
 
-        {/* Mobile Menu */}
         <div
           className={`mobile-menu-container ${
             isMenuOpen ? "block" : "hidden"
@@ -236,7 +227,6 @@ const Header = () => {
               Contact
             </Link>
 
-            {/* Mobile Account Actions */}
             <div className="border-t border-amber-100 pt-4 mt-2">
               {isAuthenticated ? (
                 <>
