@@ -15,7 +15,7 @@ import Profile from "./components/consumer/pages/Profile";
 import GoldenCart from "./components/consumer/pages/GoldenCart";
 import Header from "./components/common/Header";
 import Footer from "./components/common/Footer";
-
+import CustomOrder from "./components/consumer/pages/CustomOrder";
 const App = () => {
   return (
     <Router>
@@ -26,6 +26,16 @@ const App = () => {
             <>
               <Header />
               <LandingPage />
+              <Footer />
+            </>
+          }
+        />
+        <Route
+          path="/customOrder"
+          element={
+            <>
+              <Header />
+              <CustomOrder />
               <Footer />
             </>
           }

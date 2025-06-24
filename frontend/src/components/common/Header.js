@@ -59,31 +59,33 @@ const Header = () => {
               isMenuOpen ? "flex" : "hidden"
             } md:flex flex-col md:flex-row absolute md:static top-full left-0 w-full md:w-auto bg-gray-50 md:bg-transparent shadow-md md:shadow-none p-4 md:p-0 gap-4 md:gap-8 z-10`}
           >
-            <a
-              href="#home"
+            <Link
+              to="/"
               className="text-amber-900 hover:text-amber-600 font-medium relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-amber-500 after:to-amber-700 hover:after:w-full after:transition-all after:duration-300 py-2"
             >
               Home
-            </a>
+            </Link>
             <JewelleryDropdown />
 
-            <Link to="/collections">
-              
-              <button className="text-amber-900 hover:text-amber-600 font-medium relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-amber-500 after:to-amber-700 hover:after:w-full after:transition-all after:duration-300 py-2">
-                Collections
-              </button>
+            <Link
+              to="/collections"
+              className="text-amber-900 hover:text-amber-600 font-medium relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-amber-500 after:to-amber-700 hover:after:w-full after:transition-all after:duration-300 py-2"
+            >
+              Collections
             </Link>
-
-            <a
-              href="#CustomOrders"
+            
+            <Link
+              to="/customOrder"
               className="text-amber-900 hover:text-amber-600 font-medium relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-amber-500 after:to-amber-700 hover:after:w-full after:transition-all after:duration-300 py-2"
             >
               Custom Orders
-            </a>
-            <Link to="/ContactUs">
-              <button className="text-amber-900 hover:text-amber-600 font-medium relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-amber-500 after:to-amber-700 hover:after:w-full after:transition-all after:duration-300 py-2">
-                Contact
-              </button>
+            </Link>
+
+            <Link
+              to="/ContactUs"
+              className="text-amber-900 hover:text-amber-600 font-medium relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-gradient-to-r after:from-amber-500 after:to-amber-700 hover:after:w-full after:transition-all after:duration-300 py-2"
+            >
+              Contact
             </Link>
           </nav>
           <div className="hidden md:flex items-center gap-4">
@@ -93,25 +95,29 @@ const Header = () => {
             >
               <SearchIcon />
             </button>
-
-            <button className="p-2 rounded-full hover:bg-amber-50 text-amber-800 hover:text-amber-600 transition-colors relative">
-              <FavoriteBorderIcon />
-              {wishlistItems > 0 && (
-                <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {wishlistItems}
-                </span>
-              )}
-            </button>
-            <Link to="/cart">
-              <button className="p-2 rounded-full hover:bg-amber-50 text-amber-800 hover:text-amber-600 transition-colors relative">
-                <ShoppingCartIcon />
-                {cartItems > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-amber-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    {cartItems}
-                  </span>
-                )}
-              </button>
-            </Link>
+            {isAuthenticated && (
+              <>
+                <button className="p-2 rounded-full hover:bg-amber-50 text-amber-800 hover:text-amber-600 transition-colors relative">
+                  <FavoriteBorderIcon />
+                  {wishlistItems > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {wishlistItems}
+                    </span>
+                  )}
+                </button>
+                
+                <Link to="/cart">
+                  <button className="p-2 rounded-full hover:bg-amber-50 text-amber-800 hover:text-amber-600 transition-colors relative">
+                    <ShoppingCartIcon />
+                    {cartItems > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-amber-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                        {cartItems}
+                      </span>
+                    )}
+                  </button>
+                </Link>
+              </>
+            )}
 
             <div className="relative">
               <button
