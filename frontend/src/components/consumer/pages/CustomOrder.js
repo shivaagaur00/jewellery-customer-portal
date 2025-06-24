@@ -16,8 +16,6 @@ import {
   Scale as WeightIcon,
   Star as SpecialIcon
 } from '@mui/icons-material';
-
-// Dummy data
 const customerOrders = [
   {
     id: "ORD-001",
@@ -309,7 +307,7 @@ const CustomOrder = () => {
                 {formStep === 1 && (
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                      <label className=" text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
                         <OrderIcon className="text-amber-600" />
                         Metal Type
                       </label>
@@ -329,7 +327,7 @@ const CustomOrder = () => {
 
                     {orderForm.metal && (
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                        <label className=" text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
                           <OrderIcon className="text-amber-600" />
                           Purity
                         </label>
@@ -349,7 +347,7 @@ const CustomOrder = () => {
                     )}
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                      <label className=" text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
                         <DescriptionIcon className="text-amber-600" />
                         Item Name
                       </label>
@@ -364,7 +362,7 @@ const CustomOrder = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                      <label className=" text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
                         <DescriptionIcon className="text-amber-600" />
                         Description
                       </label>
@@ -379,7 +377,7 @@ const CustomOrder = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                        <label className=" text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
                           <WeightIcon className="text-amber-600" />
                           Weight (g)
                         </label>
@@ -393,7 +391,7 @@ const CustomOrder = () => {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                        <label className=" text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
                           <MoneyIcon className="text-amber-600" />
                           Expected Price ($)
                         </label>
@@ -413,7 +411,7 @@ const CustomOrder = () => {
                 {formStep === 2 && (
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                      <label className=" text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
                         <MoneyIcon className="text-amber-600" />
                         Deposit Amount ($)
                       </label>
@@ -428,7 +426,7 @@ const CustomOrder = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                      <label className=" text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
                         <CalendarIcon className="text-amber-600" />
                         Expected Delivery Date
                       </label>
@@ -443,7 +441,7 @@ const CustomOrder = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                      <label className=" text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
                         <SpecialIcon className="text-amber-600" />
                         Special Instructions
                       </label>
