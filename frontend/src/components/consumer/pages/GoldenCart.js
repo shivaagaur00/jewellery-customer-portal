@@ -12,7 +12,7 @@ import {
   Remove
 } from '@mui/icons-material';
 import { useSelector } from 'react-redux';
-import { cartItems, removeFromCart, updateCartItem } from '../../../api/customerAPIs';
+import { cartItems, removeFromCart } from '../../../api/customerAPIs';
 
 const GoldenCart = () => {
   const [items, setItems] = useState([]);
@@ -40,25 +40,6 @@ const GoldenCart = () => {
       console.error("Failed to remove item", error);
     }
   };
-
-  const handleQuantityChange = async (itemId, change) => {
-    try {
-      const item = items.find(i => i.ID === itemId);
-      const newQuantity = item.quantity + change;
-      
-      if (newQuantity < 1) return;
-      
-      await updateCartItem({
-        itemId,
-        quantity: newQuantity
-      }, token);
-      
-      await fetchCartItems();
-    } catch (error) {
-      console.error("Failed to update quantity", error);
-    }
-  };
-
   useEffect(() => {
     if (token) {
       fetchCartItems();
@@ -136,21 +117,7 @@ const GoldenCart = () => {
                             <p><span className="font-medium">Metal:</span> {item.metalType} ({item.itemPurity})</p>
                             <p><span className="font-medium">Weight:</span> {item.weight}g</p>
                             <p><span className="font-medium">Quantity:</span></p>
-                            <div className="flex items-center border border-amber-200 rounded-lg w-fit mt-1">
-                              <button 
-                                onClick={() => handleQuantityChange(item.ID, -1)}
-                                className="px-3 py-1 bg-amber-100 hover:bg-amber-200 text-amber-800 transition-colors"
-                              >
-                                <Remove fontSize="small" />
-                              </button>
-                              <span className="px-4 py-1 text-center min-w-[2rem]">{item.quantity}</span>
-                              <button 
-                                onClick={() => handleQuantityChange(item.ID, 1)}
-                                className="px-3 py-1 bg-amber-100 hover:bg-amber-200 text-amber-800 transition-colors"
-                              >
-                                <Add fontSize="small" />
-                              </button>
-                            </div>
+                            
                           </div>
                           
                           <div className="mt-4">

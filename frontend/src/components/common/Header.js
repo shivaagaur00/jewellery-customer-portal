@@ -14,7 +14,6 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
-  const [cartItems] = useState(3);
   const [wishlistItems] = useState(2);
   const { isAuthenticated } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
@@ -97,23 +96,11 @@ const Header = () => {
             </button>
             {isAuthenticated && (
               <>
-                <button className="p-2 rounded-full hover:bg-amber-50 text-amber-800 hover:text-amber-600 transition-colors relative">
-                  <FavoriteBorderIcon />
-                  {wishlistItems > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                      {wishlistItems}
-                    </span>
-                  )}
-                </button>
                 
                 <Link to="/cart">
                   <button className="p-2 rounded-full hover:bg-amber-50 text-amber-800 hover:text-amber-600 transition-colors relative">
                     <ShoppingCartIcon />
-                    {cartItems > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-amber-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                        {cartItems}
-                      </span>
-                    )}
+                    
                   </button>
                 </Link>
               </>

@@ -89,29 +89,16 @@ export const cartItems = async (token) => {
     throw error;
   }
 };
-export const removeFromCart = async (token) => {
+export const removeFromCart = async (data,token) => {
   try {
-    const res = await axios.get(`${URL}/getCartItems`, {
+    const res = await axios.post(`${URL}/removeFromCart`,data, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
     return res.data;
   } catch (error) {
-    console.error("Failed to fetch cart items", error);
-    throw error;
-  }
-};
-export const updateCartItem = async (token) => {
-  try {
-    const res = await axios.get(`${URL}/getCartItems`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return res.data;
-  } catch (error) {
-    console.error("Failed to fetch cart items", error);
+    console.error("Failed to removeFromCart", error);
     throw error;
   }
 };
