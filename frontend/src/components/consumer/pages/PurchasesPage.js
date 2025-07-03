@@ -132,13 +132,11 @@ const PurchasesPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Your Purchases</h1>
           <p className="text-gray-600">View your jewelry purchase history</p>
         </div>
 
-        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-white p-4 rounded-lg shadow-md border-l-4 border-blue-500">
             <h3 className="text-gray-500 text-sm">Total Purchases</h3>
@@ -161,7 +159,6 @@ const PurchasesPage = () => {
           </div>
         </div>
 
-        {/* Purchases List */}
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           {purchases.length === 0 ? (
             <div className="p-12 text-center">
@@ -192,11 +189,9 @@ const PurchasesPage = () => {
                     </div>
                   </div>
 
-                  {/* Purchase Items */}
                   <div className="space-y-4">
                     {purchase.items.map((item) => (
                       <div key={item.id} className="flex flex-col sm:flex-row gap-4 p-4 bg-gray-50 rounded-lg">
-                        {/* Item Image */}
                         <div className="w-full sm:w-24 h-24 bg-gray-200 rounded-lg flex items-center justify-center">
                           {item.image ? (
                             <img src={item.image} alt={item.name} className="w-full h-full object-cover rounded-lg" />
@@ -205,7 +200,6 @@ const PurchasesPage = () => {
                           )}
                         </div>
 
-                        {/* Item Details */}
                         <div className="flex-1">
                           <div className="flex flex-col sm:flex-row sm:justify-between gap-2">
                             <div>
@@ -232,7 +226,6 @@ const PurchasesPage = () => {
                             </div>
                           </div>
 
-                          {/* Rating Section */}
                           <div className="mt-3">
                             {item.rating ? (
                               <div className="flex items-center gap-2">
@@ -257,7 +250,6 @@ const PurchasesPage = () => {
                     ))}
                   </div>
 
-                  {/* Purchase Summary */}
                   <div className="mt-4 pt-4 border-t border-gray-200 flex flex-col sm:flex-row sm:justify-between gap-4">
                     <div className="text-sm">
                       <p className="text-gray-600">
@@ -285,5 +277,4 @@ const PurchasesPage = () => {
     </div>
   );
 };
-
 export default PurchasesPage;
