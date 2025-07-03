@@ -136,3 +136,16 @@ export const fetchCustomOrders = async (token) => {
     throw error;
   }
 };
+export const placeOrder=async(data,token)=>{
+  try {  
+  let res=await axios.post(`${URL}/placeOrder`,data,{
+    headers:{
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res;
+  } catch (error) {
+    console.log(error);
+  }
+
+};

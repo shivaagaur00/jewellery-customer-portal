@@ -16,6 +16,7 @@ import GoldenCart from "./components/consumer/pages/GoldenCart";
 import Header from "./components/common/Header";
 import Footer from "./components/common/Footer";
 import CustomOrder from "./components/consumer/pages/CustomOrder";
+import NotDeliveredOrders from "./components/consumer/pages/NotDeliveredOrders";
 const App = () => {
   return (
     <Router>
@@ -77,6 +78,16 @@ const App = () => {
             <>
               <Header />
               <GoldenCart />
+              <Footer />
+            </>
+          }
+        />
+                <Route
+          path="/NotDeliveredOrders"
+          element={
+            <>
+              <Header />
+              <NotDeliveredOrders />
               <Footer />
             </>
           }

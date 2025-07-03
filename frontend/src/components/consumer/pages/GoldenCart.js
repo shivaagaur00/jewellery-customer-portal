@@ -12,13 +12,25 @@ import {
   Remove
 } from '@mui/icons-material';
 import { useSelector } from 'react-redux';
-import { cartItems, removeFromCart } from '../../../api/customerAPIs';
+import { cartItems, placeOrder, removeFromCart } from '../../../api/customerAPIs';
 
 const GoldenCart = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const token = useSelector((state) => state.auth.user?.token);
-
+  const handlePlaceOrder = async () => {
+  try {
+    const orderData = {
+      itemIds: items.map(item => item.ID),
+      orderCost: total
+    };
+    let res = await placeOrder(orderData, token);
+    console.log(res);
+    await fetchCartItems();
+  } catch (error) {
+    console.log(error);
+  }
+}
   const fetchCartItems = async () => {
     try {
       setLoading(true);
@@ -174,6 +186,7 @@ const GoldenCart = () => {
                 
                 <button 
                   disabled={items.length === 0}
+                  onClick={()=>handlePlaceOrder()}
                   className={`w-full py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors ${items.length === 0 ? 'bg-gray-300 cursor-not-allowed' : 'bg-amber-600 hover:bg-amber-700 text-white'}`}
                 >
                   Proceed to Checkout <ArrowForward />
