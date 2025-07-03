@@ -177,3 +177,17 @@ export const fetchNotDeliveredOrderModalItems= async (data,token) => {
     throw error;
   }
 };
+
+export const getLoansOfCustomer= async (token) => {
+  try {
+    const res = await axios.get(`${URL}/fetchLoansOfCustomer`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return res;
+  } catch (error) {
+    console.error("Failed to fetch fetchLoansOfCustomer items", error);
+    throw error;
+  }
+};

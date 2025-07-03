@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import {
   DiamondOutlined as GemIcon,
   CalendarToday as CalendarIcon,
@@ -7,73 +8,63 @@ import {
   Scale as WeightIcon,
   CheckCircle as CheckCircleIcon,
   AccessTime as ClockIcon,
-  Warning as WarningIcon
+  Warning as WarningIcon,
+  
 } from '@mui/icons-material';
+import { Favorite, Home, Settings } from '@mui/icons-material';
+import { getLoansOfCustomer } from '../../../api/customerAPIs';
 
 const LoansPage = () => {
-  // Dummy data based on your schema
-  const loans = [
-    {
-      _id: '1',
-      customer: 'Rajesh Kumar',
-      customerID: 'CUST1001',
-      itemType: 'Gold Chain',
-      itemDescription: '22k Gold Chain with intricate design',
-      loanAmount: 50000,
-      loanPaidedAmount: 15000,
-      interestRate: 12,
-      weight: '25 grams',
-      purity: '22 Karat',
-      dateIssued: '2023-05-15',
-      dueDate: '2023-11-15',
-      datePaid: '',
-      holderName: 'Mohan Lal',
-      status: 'Active',
-      collateralImages: ['image1.jpg', 'image2.jpg'],
-      totalPayable: '56000',
-      remainingAmount: '41000'
-    },
-    {
-      _id: '2',
-      customer: 'Rajesh Kumar',
-      customerID: 'CUST1001',
-      itemType: 'Diamond Ring',
-      itemDescription: 'Platinum ring with 1ct diamond',
-      loanAmount: 75000,
-      loanPaidedAmount: 75000,
-      interestRate: 10,
-      weight: '8 grams',
-      purity: 'PT950',
-      dateIssued: '2023-01-10',
-      dueDate: '2023-07-10',
-      datePaid: '2023-06-28',
-      holderName: 'Mohan Lal',
-      status: 'Completed',
-      collateralImages: ['image3.jpg'],
-      totalPayable: '78750',
-      remainingAmount: '0'
-    },
-    {
-      _id: '3',
-      customer: 'Rajesh Kumar',
-      customerID: 'CUST1001',
-      itemType: 'Gold Bangles',
-      itemDescription: 'Pair of 22k gold bangles',
-      loanAmount: 30000,
-      loanPaidedAmount: 5000,
-      interestRate: 15,
-      weight: '30 grams',
-      purity: '22 Karat',
-      dateIssued: '2023-03-20',
-      dueDate: '2023-09-20',
-      datePaid: '',
-      holderName: 'Mohan Lal',
-      status: 'Pending',
-      collateralImages: ['image4.jpg', 'image5.jpg'],
-      totalPayable: '34500',
-      remainingAmount: '29500'
+  const [loans, setLoans] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    activeLoans: 0,
+    totalBorrowed: 0,
+    pendingPayments: 0
+  });
+  
+  const token = useSelector((state) => state.auth.user?.token);
+
+  const fetchLoans = async () => {
+    try {
+      setLoading(true);
+      const res = await getLoansOfCustomer(token);
+      console.log(res);
+      setLoans(res.data.loans || []);
+      calculateStats(res.data.loans || []);
+    } catch (error) {
+      console.error("Failed to fetch loans", error);
+      setLoans([]);
+      calculateStats([]);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const calculateStats = (loanData) => {
+  let activeLoans = 0;
+  let totalBorrowed = 0;
+  let pendingPayments = 0;
+
+  loanData.forEach(loan => {
+    const loanAmount = loan.loanAmount || 0;
+    const paidAmount = loan.loanPaidedAmount || 0;
+    totalBorrowed += loanAmount;
+    if (loan.status === 'Active') {
+      activeLoans++;
+      pendingPayments+=(loanAmount-paidAmount);
+    }
+  });
+  console.log(activeLoans);
+  setStats({ activeLoans, totalBorrowed, pendingPayments });
+};
+
+
+  useEffect(() => {
+    if (token) {
+      fetchLoans();
+    }
+  }, [token]);
 
   const getStatusBadge = (status) => {
     switch (status) {
@@ -96,32 +87,45 @@ const LoansPage = () => {
     return new Date(dateString).toLocaleDateString('en-IN', options);
   };
 
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0
+    }).format(amount || 0);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-yellow-50 to-amber-50 flex items-center justify-center">
+        <WarningIcon className="text-amber-600" size={60} />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-yellow-50 to-amber-50 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-amber-900 mb-2">Your Jewelry Loans</h1>
           <p className="text-amber-700 text-lg">Manage your pledged jewelry items</p>
         </div>
 
-        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <div className="bg-white p-4 rounded-lg shadow-md border-l-4 border-amber-500">
             <h3 className="text-gray-500 text-sm">Active Loans</h3>
-            <p className="text-2xl font-bold text-amber-700">1</p>
+            <p className="text-2xl font-bold text-amber-700">{stats.activeLoans}</p>
           </div>
           <div className="bg-white p-4 rounded-lg shadow-md border-l-4 border-green-500">
             <h3 className="text-gray-500 text-sm">Total Borrowed</h3>
-            <p className="text-2xl font-bold text-amber-700">₹50,000</p>
+            <p className="text-2xl font-bold text-amber-700">{formatCurrency(stats.totalBorrowed)}</p>
           </div>
           <div className="bg-white p-4 rounded-lg shadow-md border-l-4 border-blue-500">
             <h3 className="text-gray-500 text-sm">Pending Payments</h3>
-            <p className="text-2xl font-bold text-amber-700">₹41,000</p>
+            <p className="text-2xl font-bold text-amber-700">{formatCurrency(stats.pendingPayments)}</p>
           </div>
         </div>
 
-        {/* Loans List */}
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           {loans.length === 0 ? (
             <div className="p-12 text-center">
@@ -134,15 +138,14 @@ const LoansPage = () => {
               {loans.map((loan) => (
                 <div key={loan._id} className="p-6 hover:bg-amber-50 transition-colors">
                   <div className="flex flex-col md:flex-row gap-6">
-                    {/* Loan Image */}
                     <div className="w-full md:w-1/4 lg:w-1/5 bg-amber-100 rounded-lg flex items-center justify-center relative h-40">
                       <GemIcon className="text-amber-400 text-4xl" />
-                      <span className="absolute bottom-2 right-2 bg-white bg-opacity-80 text-black px-2 py-1 rounded text-xs font-medium shadow">
-                        {loan.collateralImages.length} {loan.collateralImages.length === 1 ? 'image' : 'images'}
-                      </span>
+                      {loan.collateralImages?.length > 0 && (
+                        <span className="absolute bottom-2 right-2 bg-white bg-opacity-80 text-black px-2 py-1 rounded text-xs font-medium shadow">
+                          {loan.collateralImages.length} {loan.collateralImages.length === 1 ? 'image' : 'images'}
+                        </span>
+                      )}
                     </div>
-
-                    {/* Loan Details */}
                     <div className="flex-1">
                       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-4">
                         <div>
@@ -152,13 +155,12 @@ const LoansPage = () => {
                         {getStatusBadge(loan.status)}
                       </div>
 
-                      {/* Loan Info Grid */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
                         <div className="flex items-center gap-2">
                           <MoneyIcon className="text-amber-500" fontSize="small" />
                           <div>
                             <p className="text-xs text-amber-600">Loan Amount</p>
-                            <p className="font-medium">₹{loan.loanAmount.toLocaleString()}</p>
+                            <p className="font-medium">{formatCurrency(loan.loanAmount)}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
@@ -172,7 +174,7 @@ const LoansPage = () => {
                           <WeightIcon className="text-amber-500" fontSize="small" />
                           <div>
                             <p className="text-xs text-amber-600">Weight & Purity</p>
-                            <p className="font-medium">{loan.weight} ({loan.purity})</p>
+                            <p className="font-medium">{loan.weight || '-'} ({loan.purity || '-'})</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
@@ -193,32 +195,30 @@ const LoansPage = () => {
                           <MoneyIcon className="text-amber-500" fontSize="small" />
                           <div>
                             <p className="text-xs text-amber-600">Paid Amount</p>
-                            <p className="font-medium">₹{loan.loanPaidedAmount.toLocaleString()}</p>
+                            <p className="font-medium">{formatCurrency(loan.loanPaidedAmount)}</p>
                           </div>
                         </div>
                       </div>
 
-                      {/* Progress Bar */}
                       <div className="mb-4">
                         <div className="flex justify-between text-sm text-amber-700 mb-1">
                           <span>Payment Progress</span>
-                          <span>₹{loan.loanPaidedAmount.toLocaleString()} of ₹{loan.loanAmount.toLocaleString()}</span>
+                          <span>{formatCurrency(loan.loanPaidedAmount)} of {formatCurrency(loan.loanAmount)}</span>
                         </div>
                         <div className="w-full bg-amber-200 rounded-full h-2.5">
                           <div 
                             className="bg-amber-600 h-2.5 rounded-full" 
-                            style={{ width: `${(loan.loanPaidedAmount / loan.loanAmount) * 100}%` }}
-                          ></div>
+                            style={{ 
+                              width: `${((loan.loanPaidedAmount || 0) / loan.loanAmount * 100)}%`,
+                              maxWidth: '100%'
+                            }}
+                          />
                         </div>
                       </div>
 
-                      {/* Action Buttons */}
                       <div className="flex flex-wrap gap-3">
                         <button className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center gap-2">
                           Make Payment
-                        </button>
-                        <button className="px-4 py-2 border border-amber-600 text-amber-600 rounded-lg hover:bg-amber-50 transition-colors">
-                          View Details
                         </button>
                         {loan.status === 'Active' && (
                           <button className="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 transition-colors">
@@ -234,24 +234,23 @@ const LoansPage = () => {
           )}
         </div>
 
-        {/* Loan Status Legend */}
         <div className="mt-8 bg-white p-6 rounded-xl shadow-md">
           <h4 className="font-medium text-lg text-amber-900 mb-4">Loan Status Guide</h4>
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
             <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-yellow-400"></span>
+              <span className="w-3 h-3 rounded-full bg-yellow-400" />
               <span className="text-sm">Active - Currently ongoing</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-green-400"></span>
+              <span className="w-3 h-3 rounded-full bg-green-400" />
               <span className="text-sm">Completed - Fully repaid</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-red-400"></span>
+              <span className="w-3 h-3 rounded-full bg-red-400" />
               <span className="text-sm">Defaulted - Payment overdue</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-blue-400"></span>
+              <span className="w-3 h-3 rounded-full bg-blue-400" />
               <span className="text-sm">Pending - Approval needed</span>
             </div>
           </div>
