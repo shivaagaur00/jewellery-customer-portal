@@ -191,3 +191,18 @@ export const getLoansOfCustomer= async (token) => {
     throw error;
   }
 };
+
+export const getPurchasesOfCustomer= async (token) => {
+  try {
+    const res = await axios.get(`${URL}/fetchPurchasesOfCustomer`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return res;
+  } catch (error) {
+    console.error("Failed to fetch fetchPurchasesOfCustomer items", error);
+    throw error;
+  }
+};
+

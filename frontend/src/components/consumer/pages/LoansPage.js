@@ -22,9 +22,7 @@ const LoansPage = () => {
     totalBorrowed: 0,
     pendingPayments: 0
   });
-  
   const token = useSelector((state) => state.auth.user?.token);
-
   const fetchLoans = async () => {
     try {
       setLoading(true);
