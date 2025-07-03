@@ -17,6 +17,8 @@ import Header from "./components/common/Header";
 import Footer from "./components/common/Footer";
 import CustomOrder from "./components/consumer/pages/CustomOrder";
 import NotDeliveredOrders from "./components/consumer/pages/NotDeliveredOrders";
+import LoansPage from "./components/consumer/pages/LoansPage";
+import PurchasesPage from "./components/consumer/pages/PurchasesPage";
 const App = () => {
   return (
     <Router>
@@ -31,7 +33,7 @@ const App = () => {
             </>
           }
         />
-        
+
         <Route
           path="/contactUS"
           element={
@@ -82,7 +84,7 @@ const App = () => {
             </>
           }
         />
-                <Route
+        <Route
           path="/NotDeliveredOrders"
           element={
             <>
@@ -104,15 +106,35 @@ const App = () => {
             }
           />
           <Route
-          path="/customOrder"
-          element={
-            <>
-              <Header />
-              <CustomOrder />
-              <Footer />
-            </>
-          }
-        />
+            path="/loans"
+            element={
+              <>
+                <Header />
+                <LoansPage />
+                <Footer />
+              </>
+            }
+          />
+          <Route
+            path="/customOrder"
+            element={
+              <>
+                <Header />
+                <CustomOrder />
+                <Footer />
+              </>
+            }
+          />
+          <Route
+            path="/PurchasesPage"
+            element={
+              <>
+                <Header />
+                <PurchasesPage />
+                <Footer />
+              </>
+            }
+          />
         </Route>
         <Route
           path="*"
