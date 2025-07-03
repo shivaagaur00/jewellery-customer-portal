@@ -64,7 +64,7 @@ const HeroSection = () => {
           <div className="relative">
             <div className="w-80 h-80 md:w-96 md:h-96 bg-gradient-to-br from-amber-200 to-amber-300 rounded-full flex items-center justify-center overflow-hidden shadow-2xl transform rotate-2">
               <img 
-                src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" 
+                src="https://d25g9z9s77rn4i.cloudfront.net/uploads/product/1341/1707916623_f37993843c432aa445d4.png"
                 alt="Gold Necklace" 
                 className="w-full h-full object-cover scale-110"
               />

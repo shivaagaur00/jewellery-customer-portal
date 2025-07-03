@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import FavoriteIcon from '@mui/icons-material/Favorite';
-import StarIcon from '@mui/icons-material/Star';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
 import { Link } from 'react-router-dom';
 import { addToCart, getDetailsWithoutLogin } from '../../api/customerAPIs';
@@ -99,20 +98,9 @@ const FeaturedCollections = () => {
               
               <div className="p-6">
                 <h3 className="font-bold text-lg text-gray-900 group-hover:text-amber-600 transition-colors duration-300 mb-3">
-                  {item.name}
+                  {item.itemName}
                 </h3>
                 
-                <div className="flex items-center mb-4">
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <StarIcon 
-                        key={i} 
-                        className={`${i < Math.floor(item.rating) ? 'text-amber-400' : 'text-gray-300'} text-sm`} 
-                      />
-                    ))}
-                  </div>
-                  <span className="ml-2 text-gray-600 text-sm font-medium">{item.rating}</span>
-                </div>
                 
                 <div className="mb-4">
                   <span className="text-xl font-bold text-amber-600">{item.price}</span>

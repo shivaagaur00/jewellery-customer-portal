@@ -85,7 +85,7 @@ const App = () => {
           }
         />
         <Route
-          path="/NotDeliveredOrders"
+          path="/not-delivered-orders"
           element={
             <>
               <Header />
@@ -126,7 +126,7 @@ const App = () => {
             }
           />
           <Route
-            path="/PurchasesPage"
+            path="/purchases"
             element={
               <>
                 <Header />

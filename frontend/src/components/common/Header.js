@@ -102,6 +102,29 @@ const Header = () => {
           </nav>
 
           <div className="flex items-center gap-4">
+            {isAuthenticated && (
+              <div className="hidden md:flex items-center gap-4 mr-4">
+                <Link
+                  to="/purchases"
+                  className="text-amber-900 hover:text-amber-600 font-medium text-sm px-3 py-1 rounded-lg hover:bg-amber-50 transition-colors"
+                >
+                  My Purchases
+                </Link>
+                <Link
+                  to="/loans"
+                  className="text-amber-900 hover:text-amber-600 font-medium text-sm px-3 py-1 rounded-lg hover:bg-amber-50 transition-colors"
+                >
+                  My Loans
+                </Link>
+                <Link
+                  to="/not-delivered-orders"
+                  className="text-amber-900 hover:text-amber-600 font-medium text-sm px-3 py-1 rounded-lg hover:bg-amber-50 transition-colors"
+                >
+                  Pending Orders
+                </Link>
+              </div>
+            )}
+
             <button
               onClick={handleSearchToggle}
               className="p-2 rounded-full hover:bg-amber-50 text-amber-800 hover:text-amber-600 transition-colors"
@@ -150,6 +173,27 @@ const Header = () => {
                         onClick={() => setIsAccountMenuOpen(false)}
                       >
                         Profile
+                      </Link>
+                      <Link
+                        to="/purchases"
+                        className="block px-4 py-2 text-amber-800 hover:bg-amber-50 transition-colors"
+                        onClick={() => setIsAccountMenuOpen(false)}
+                      >
+                        My Purchases
+                      </Link>
+                      <Link
+                        to="/loans"
+                        className="block px-4 py-2 text-amber-800 hover:bg-amber-50 transition-colors"
+                        onClick={() => setIsAccountMenuOpen(false)}
+                      >
+                        My Loans
+                      </Link>
+                      <Link
+                        to="/not-delivered-orders"
+                        className="block px-4 py-2 text-amber-800 hover:bg-amber-50 transition-colors"
+                        onClick={() => setIsAccountMenuOpen(false)}
+                      >
+                        Pending Orders
                       </Link>
                       <div className="border-t border-amber-100 my-1"></div>
                       <button
@@ -226,6 +270,33 @@ const Header = () => {
             >
               Contact
             </Link>
+
+            {isAuthenticated && (
+              <>
+                <div className="border-t border-amber-100 pt-2 mt-2"></div>
+                <Link
+                  to="/purchases"
+                  className="text-amber-900 hover:text-amber-600 font-medium py-2 px-3 rounded-lg hover:bg-amber-50 transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  My Purchases
+                </Link>
+                <Link
+                  to="/loans"
+                  className="text-amber-900 hover:text-amber-600 font-medium py-2 px-3 rounded-lg hover:bg-amber-50 transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  My Loans
+                </Link>
+                <Link
+                  to="/not-delivered-orders"
+                  className="text-amber-900 hover:text-amber-600 font-medium py-2 px-3 rounded-lg hover:bg-amber-50 transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Pending Orders
+                </Link>
+              </>
+            )}
 
             <div className="border-t border-amber-100 pt-4 mt-2">
               {isAuthenticated ? (
