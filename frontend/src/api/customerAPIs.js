@@ -119,6 +119,7 @@ export const addOrder=async(data,token)=>{
         Authorization: `Bearer ${token}`,
       },
     });
+    return res;
   } catch (error) {
     console.log(error);
   }
@@ -148,4 +149,31 @@ export const placeOrder=async(data,token)=>{
     console.log(error);
   }
 
+};
+export const notDeliveredOrdersAPI= async (token) => {
+  try {
+    const res = await axios.get(`${URL}/getNotDeliverOrders`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return res;
+  } catch (error) {
+    console.error("Failed to fetch getNotDeliverOrders items", error);
+    throw error;
+  }
+};
+
+export const fetchNotDeliveredOrderModalItems= async (data,token) => {
+  try {
+    const res = await axios.post(`${URL}/fetchNotDeliveredOrderModalItems`,data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return res;
+  } catch (error) {
+    console.error("Failed to fetch NotDeliveredOrderModalItems items", error);
+    throw error;
+  }
 };
